@@ -227,72 +227,72 @@ export default function CountdownTimer() {
       <style jsx>{`
         @keyframes ambulance-flash {
           0%, 50% { 
-            background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 50%, #dc2626 100%);
-            box-shadow: 0 0 100px rgba(220, 38, 38, 0.8), inset 0 0 100px rgba(220, 38, 38, 0.3);
+            background: linear-gradient(135deg, #fca5a5 0%, #dc2626 50%, #fca5a5 100%);
+            box-shadow: 0 0 60px rgba(220, 38, 38, 0.4), inset 0 0 60px rgba(220, 38, 38, 0.2);
           }
           25%, 75% { 
-            background: linear-gradient(135deg, #ea580c 0%, #9a3412 50%, #ea580c 100%);
-            box-shadow: 0 0 100px rgba(234, 88, 12, 0.8), inset 0 0 100px rgba(234, 88, 12, 0.3);
+            background: linear-gradient(135deg, #fed7aa 0%, #ea580c 50%, #fed7aa 100%);
+            box-shadow: 0 0 60px rgba(234, 88, 12, 0.4), inset 0 0 60px rgba(234, 88, 12, 0.2);
           }
         }
         
         @keyframes heartbeat {
           0%, 100% { 
             transform: scale(1);
-            text-shadow: 0 0 20px rgba(220, 38, 38, 0.8);
+            text-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
           }
           14% { 
-            transform: scale(1.05);
-            text-shadow: 0 0 40px rgba(220, 38, 38, 1);
+            transform: scale(1.02);
+            text-shadow: 0 0 25px rgba(220, 38, 38, 0.7);
           }
           28% { 
             transform: scale(1);
-            text-shadow: 0 0 20px rgba(220, 38, 38, 0.8);
+            text-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
           }
           42% { 
-            transform: scale(1.08);
-            text-shadow: 0 0 50px rgba(220, 38, 38, 1);
+            transform: scale(1.03);
+            text-shadow: 0 0 30px rgba(220, 38, 38, 0.8);
           }
           70% { 
             transform: scale(1);
-            text-shadow: 0 0 20px rgba(220, 38, 38, 0.8);
+            text-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
           }
         }
         
         @keyframes pulse-glow {
           0%, 100% { 
-            box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.3);
           }
           50% { 
-            box-shadow: 0 0 60px rgba(220, 38, 38, 0.9), 0 0 100px rgba(234, 88, 12, 0.6);
+            box-shadow: 0 0 40px rgba(220, 38, 38, 0.6), 0 0 60px rgba(234, 88, 12, 0.4);
           }
         }
         
         .ambulance-bg {
-          animation: ambulance-flash 1.5s infinite;
+          animation: ambulance-flash 2s infinite;
         }
         
         .heartbeat-text {
-          animation: heartbeat 1.2s infinite;
+          animation: heartbeat 1.5s infinite;
         }
         
         .pulse-glow {
-          animation: pulse-glow 2s infinite;
+          animation: pulse-glow 2.5s infinite;
         }
         
         .emergency-border {
-          border: 3px solid transparent;
-          background: linear-gradient(45deg, #dc2626, #ea580c, #dc2626) border-box;
-          animation: pulse-glow 1s infinite;
+          border: 2px solid transparent;
+          background: linear-gradient(45deg, #fca5a5, #fed7aa, #fca5a5) border-box;
+          animation: pulse-glow 1.5s infinite;
         }
       `}</style>
 
       <div
         className={cn(
-          "min-h-screen flex flex-col transition-all duration-700",
+          "min-h-screen w-full flex flex-col transition-all duration-700 overflow-hidden",
           isFullscreen
             ? timer.isOvertime
-              ? "ambulance-bg text-white" // Using custom ambulance animation class
+              ? "ambulance-bg text-white"
               : "bg-black text-white"
             : "bg-gradient-to-br from-stone-50 via-neutral-50 to-amber-50/30",
         )}
@@ -307,7 +307,7 @@ export default function CountdownTimer() {
           </div>
         )}
 
-        <div className="flex-1 flex items-center justify-center p-4">
+        <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
           {isFullscreen && (
             <div className="fixed top-4 right-4 z-10 text-neutral-400 text-xs md:text-sm opacity-60 hover:opacity-100 transition-all duration-300">
               Press ESC or F to exit fullscreen
@@ -322,7 +322,12 @@ export default function CountdownTimer() {
             </div>
           )}
 
-          <div className={cn("w-full mx-auto", isFullscreen ? "max-w-7xl" : "max-w-4xl")}>
+          <div
+            className={cn(
+              "w-full mx-auto flex items-center justify-center",
+              isFullscreen ? "max-w-none h-full" : "max-w-4xl",
+            )}
+          >
             {/* Custom Time Setter Modal */}
             {showCustomTimer && !isFullscreen && (
               <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -384,15 +389,15 @@ export default function CountdownTimer() {
             {/* Main Timer Display */}
             <Card
               className={cn(
-                "shadow-2xl transition-all duration-700 border-0",
+                "shadow-2xl transition-all duration-700 border-0 w-full max-w-6xl",
                 isFullscreen ? "bg-transparent shadow-none" : "bg-white/95 backdrop-blur-md",
                 isFullscreen && timer.isOvertime ? "emergency-border" : "",
               )}
             >
               <div
                 className={cn(
-                  "text-center transition-all duration-700",
-                  isFullscreen ? "p-8 md:p-16 lg:p-20" : "p-8 md:p-12 lg:p-16",
+                  "text-center transition-all duration-700 flex flex-col items-center justify-center",
+                  isFullscreen ? "p-4 md:p-8 lg:p-12 min-h-[80vh]" : "p-8 md:p-12 lg:p-16",
                 )}
               >
                 {/* Timer Display */}
@@ -401,12 +406,12 @@ export default function CountdownTimer() {
                     className={cn(
                       "font-black tracking-wider mb-4 md:mb-6 transition-all duration-700 leading-none select-none",
                       isFullscreen
-                        ? "text-8xl sm:text-[12rem] md:text-[16rem] lg:text-[20rem] xl:text-[24rem] 2xl:text-[28rem]"
+                        ? "text-6xl sm:text-8xl md:text-[10rem] lg:text-[12rem] xl:text-[14rem] 2xl:text-[16rem]"
                         : "text-6xl sm:text-8xl md:text-[12rem] lg:text-[14rem] xl:text-[12rem]",
                       timer.isOvertime
                         ? isFullscreen
-                          ? "text-red-400 drop-shadow-2xl heartbeat-text" // Added heartbeat animation class
-                          : "text-red-500 heartbeat-text" // Added heartbeat animation for non-fullscreen too
+                          ? "text-red-300 drop-shadow-2xl heartbeat-text"
+                          : "text-red-500 heartbeat-text"
                         : isFullscreen
                           ? "text-white drop-shadow-2xl"
                           : "text-neutral-800",
@@ -414,7 +419,7 @@ export default function CountdownTimer() {
                     style={{
                       textShadow: isFullscreen
                         ? timer.isOvertime
-                          ? "0 0 80px rgba(220, 38, 38, 0.8), 0 0 120px rgba(234, 88, 12, 0.6)" // Enhanced glow for overtime
+                          ? "0 0 40px rgba(220, 38, 38, 0.5), 0 0 60px rgba(234, 88, 12, 0.3)"
                           : "0 0 80px rgba(0,0,0,0.5)"
                         : "0 4px 20px rgba(0,0,0,0.1)",
                       fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
@@ -435,9 +440,9 @@ export default function CountdownTimer() {
                   >
                     {timer.isOvertime ? (
                       <span
-                        className={cn("font-black", isFullscreen ? "text-red-400" : "text-red-500")}
+                        className={cn("font-black", isFullscreen ? "text-red-300" : "text-red-500")}
                         style={{
-                          textShadow: "0 0 20px rgba(220, 38, 38, 0.8), 0 0 40px rgba(234, 88, 12, 0.6)",
+                          textShadow: "0 0 15px rgba(220, 38, 38, 0.5), 0 0 25px rgba(234, 88, 12, 0.3)",
                         }}
                       >
                         ⚠️ OVERTIME: +{formatTime(timer.minutes, timer.seconds)} ⚠️
