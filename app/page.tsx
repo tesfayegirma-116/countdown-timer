@@ -401,8 +401,8 @@ export default function CountdownTimer() {
                     className={cn(
                       "font-black tracking-wider mb-4 md:mb-6 transition-all duration-700 leading-none select-none",
                       isFullscreen
-                        ? "text-7xl sm:text-9xl md:text-[10rem] lg:text-[13rem] xl:text-[15rem] 2xl:text-[17rem]"
-                        : "text-5xl sm:text-7xl md:text-9xl lg:text-[10rem] xl:text-[9rem]",
+                        ? "text-8xl sm:text-[12rem] md:text-[16rem] lg:text-[20rem] xl:text-[24rem] 2xl:text-[28rem]"
+                        : "text-6xl sm:text-8xl md:text-[12rem] lg:text-[14rem] xl:text-[12rem]",
                       timer.isOvertime
                         ? isFullscreen
                           ? "text-red-400 drop-shadow-2xl heartbeat-text" // Added heartbeat animation class
