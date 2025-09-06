@@ -71,8 +71,25 @@ export function getTimerSessionsByDate(date: string): TimerSession[] {
   return stmt.all(date) as TimerSession[]
 }
 
-// Graceful shutdown
-process.on("exit", () => db.close())
-process.on("SIGHUP", () => process.exit(128 + 1))
-process.on("SIGINT", () => process.exit(128 + 2))
-process.on("SIGTERM", () => process.exit(128 + 15))
+export function deleteTimerSession(id: number): boolean {
+  const stmt = db.prepare("DELETE FROM timer_sessions WHERE id = ?")
+  const result = stmt.run(id)
+  return result.changes > 0
+}
+
+// Graceful shutdown - only add listeners if not already present
+const closeHandler = () => db.close()
+const exitHandler = (signal: number) => () => process.exit(128 + signal)
+
+if (!process.listenerCount("exit")) {
+  process.on("exit", closeHandler)
+}
+if (!process.listenerCount("SIGHUP")) {
+  process.on("SIGHUP", exitHandler(1))
+}
+if (!process.listenerCount("SIGINT")) {
+  process.on("SIGINT", exitHandler(2))
+}
+if (!process.listenerCount("SIGTERM")) {
+  process.on("SIGTERM", exitHandler(15))
+}
