@@ -1,0 +1,7 @@
+{
+    "name": "zeseat-timer",
+    "compatibility_date": "2025-09-06",
+    "assets": {
+        "directory": "./dist"
+    }
+}
