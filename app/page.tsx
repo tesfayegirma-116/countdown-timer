@@ -444,9 +444,9 @@ export default function CountdownTimer() {
             {/* Main Timer Display */}
             <Card
               className={cn(
-                "shadow-2xl transition-all duration-700 border-0 w-full max-w-6xl",
+                "shadow-2xl transition-all duration-700 border-none w-full max-w-6xl",
                 isFullscreen ? "bg-transparent shadow-none" : "bg-white/95 backdrop-blur-md",
-                isFullscreen && timer.isOvertime ? "gentle-border" : "",
+                isFullscreen && timer.isOvertime ? "" : "",
                 !isFullscreen && timer.isOvertime ? "card-pulse" : "",
               )}
             >
@@ -462,7 +462,7 @@ export default function CountdownTimer() {
                     className={cn(
                       "font-black tracking-wider mb-2 md:mb-1 transition-all duration-700 leading-none select-none",
                       isFullscreen
-                        ? "text-[10rem] sm:text-[16rem] md:text-[22rem] lg:text-[28rem] xl:text-[32rem] 2xl:text-[36rem]"
+                        ? "text-[10rem] sm:text-[14rem] md:text-[20rem] lg:text-[24rem] xl:text-[30rem] 2xl:text-[33rem]"
                         : "text-6xl sm:text-8xl md:text-[12rem] lg:text-[14rem] xl:text-[12rem]",
                       timer.isOvertime
                         ? isFullscreen
