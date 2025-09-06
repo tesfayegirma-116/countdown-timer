@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: 'Zetseat CMC',
   description: 'Created By Tesfa',
   generator: 'React',
+  icons: {
+    icon: 'https://zetseat.church/favicon-32x32.png?v=70e0dc0d060db23ae2c5b85c628db934',
+    shortcut: 'https://zetseat.church/favicon-32x32.png?v=70e0dc0d060db23ae2c5b85c628db934',
+    apple: 'https://zetseat.church/favicon-32x32.png?v=70e0dc0d060db23ae2c5b85c628db934',
+  },
 }
 
 export default function RootLayout({

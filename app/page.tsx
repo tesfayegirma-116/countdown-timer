@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Play, Pause, RotateCcw, Settings, Maximize, History, X, Clock } from "lucide-react"
+import { Play, Pause, RotateCcw, Maximize, History, X, Clock } from "lucide-react"
 import { SessionHistorySidebar } from "@/components/session-history-sidebar"
 import { CustomTimeSetter } from "@/components/custom-time-setter"
 import { cn } from "@/lib/utils"
@@ -55,6 +55,9 @@ export default function CountdownTimer() {
 
   // Calculate total seconds
   const totalSeconds = timer.minutes * 60 + timer.seconds
+
+  // Check if we're in warning time (5 minutes or less remaining)
+  const isWarningTime = !timer.isOvertime && timer.isRunning && totalSeconds <= 300 && totalSeconds > 0
 
   // Start/Stop timer
   const toggleTimer = () => {
@@ -141,12 +144,18 @@ export default function CountdownTimer() {
               isOvertime: true,
             }
           } else if (prev.isOvertime) {
-            // Count up in overtime
-            const newSeconds = prev.seconds + 1
-            return {
-              ...prev,
-              minutes: Math.floor(newSeconds / 60),
-              seconds: newSeconds % 60,
+            // Count up in overtime - continue infinitely
+            if (prev.seconds === 59) {
+              return {
+                ...prev,
+                minutes: prev.minutes + 1,
+                seconds: 0,
+              }
+            } else {
+              return {
+                ...prev,
+                seconds: prev.seconds + 1,
+              }
             }
           } else {
             // Count down normally
@@ -224,26 +233,57 @@ export default function CountdownTimer() {
 
   return (
     <>
-      <style jsx>{`
-        @keyframes gentle-pulse-bg {
+      <style jsx global>{`
+        html, body {
+          overflow: hidden !important;
+          height: 100vh !important;
+          width: 100vw !important;
+        }
+        
+        * {
+          box-sizing: border-box;
+        }
+        @keyframes overtime-pulse-bg {
           0%, 100% { 
-            background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 50%, #7f1d1d 100%);
-            box-shadow: 0 0 40px rgba(127, 29, 29, 0.3), inset 0 0 60px rgba(127, 29, 29, 0.2);
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #dc2626 100%);
+            box-shadow: 0 0 40px rgba(220, 38, 38, 0.2), inset 0 0 60px rgba(220, 38, 38, 0.15);
           }
           50% { 
-            background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 50%, #991b1b 100%);
-            box-shadow: 0 0 50px rgba(153, 27, 27, 0.4), inset 0 0 70px rgba(153, 27, 27, 0.25);
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #ef4444 100%);
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.25), inset 0 0 70px rgba(239, 68, 68, 0.2);
           }
         }
         
-        @keyframes gentle-heartbeat {
+        @keyframes warning-pulse-bg {
           0%, 100% { 
-            transform: scale(1);
-            text-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #f59e0b 100%);
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.2), inset 0 0 50px rgba(245, 158, 11, 0.15);
           }
           50% { 
-            transform: scale(1.02);
-            text-shadow: 0 0 25px rgba(220, 38, 38, 0.6);
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #fbbf24 100%);
+            box-shadow: 0 0 40px rgba(251, 191, 36, 0.25), inset 0 0 60px rgba(251, 191, 36, 0.2);
+          }
+        }
+        
+        @keyframes overtime-heartbeat {
+          0%, 100% { 
+            transform: scale(1);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(220, 38, 38, 0.4);
+          }
+          50% { 
+            transform: scale(1.01);
+            text-shadow: 0 0 25px rgba(255, 255, 255, 0.7), 0 0 50px rgba(220, 38, 38, 0.5);
+          }
+        }
+        
+        @keyframes warning-pulse {
+          0%, 100% { 
+            transform: scale(1);
+            text-shadow: 0 0 15px rgba(0, 0, 0, 0.6), 0 0 30px rgba(245, 158, 11, 0.4);
+          }
+          50% { 
+            transform: scale(1.01);
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.7), 0 0 40px rgba(245, 158, 11, 0.5);
           }
         }
         
@@ -267,12 +307,20 @@ export default function CountdownTimer() {
           }
         }
         
-        .gentle-pulse-bg {
-          animation: gentle-pulse-bg 4s ease-in-out infinite;
+        .overtime-pulse-bg {
+          animation: overtime-pulse-bg 6s ease-in-out infinite;
         }
         
-        .gentle-heartbeat-text {
-          animation: gentle-heartbeat 3s ease-in-out infinite;
+        .warning-pulse-bg {
+          animation: warning-pulse-bg 8s ease-in-out infinite;
+        }
+        
+        .overtime-heartbeat-text {
+          animation: overtime-heartbeat 5s ease-in-out infinite;
+        }
+        
+        .warning-pulse-text {
+          animation: warning-pulse 6s ease-in-out infinite;
         }
         
         .soft-glow {
@@ -291,12 +339,18 @@ export default function CountdownTimer() {
 
       <div
         className={cn(
-          "min-h-screen w-full flex flex-col transition-all duration-700 overflow-hidden",
+          "h-screen w-screen flex flex-col transition-all duration-700 overflow-hidden",
           isFullscreen
             ? timer.isOvertime
-              ? "gentle-pulse-bg text-white" // Using gentle pulse animation class
-              : "bg-black text-white"
-            : "bg-gradient-to-br from-stone-50 via-neutral-50 to-amber-50/30",
+              ? "overtime-pulse-bg text-white"
+              : isWarningTime
+                ? "warning-pulse-bg text-black"
+                : "bg-black text-white"
+            : timer.isOvertime
+              ? "bg-gradient-to-br from-red-100 via-red-50 to-red-100"
+              : isWarningTime
+                ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-yellow-100"
+                : "bg-gradient-to-br from-stone-50 via-neutral-50 to-amber-50/30",
         )}
       >
         {!isFullscreen && (
@@ -309,18 +363,17 @@ export default function CountdownTimer() {
           </div>
         )}
 
-        <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
+        <div className="flex-1 flex items-center justify-center overflow-hidden relative">
           {isFullscreen && (
-            <div className="fixed top-4 right-4 z-10 text-neutral-400 text-xs md:text-sm opacity-60 hover:opacity-100 transition-all duration-300">
-              Press ESC or F to exit fullscreen
+            <div className="fixed top-2 right-2 z-10 text-neutral-400 text-xs opacity-40 hover:opacity-80 transition-all duration-300">
+              ESC or F to exit
             </div>
           )}
 
           {isFullscreen && (
-            <div className="fixed bottom-4 left-4 z-10 text-neutral-500 text-xs space-y-1 opacity-40 hover:opacity-100 transition-all duration-300">
+            <div className="fixed bottom-2 left-2 z-10 text-neutral-500 text-xs space-y-1 opacity-30 hover:opacity-70 transition-all duration-300">
               <div>SPACE - Start/Pause</div>
               <div>R - Reset</div>
-              <div>F - Toggle Fullscreen</div>
             </div>
           )}
 
@@ -399,93 +452,120 @@ export default function CountdownTimer() {
             >
               <div
                 className={cn(
-                  "text-center transition-all duration-700 flex flex-col items-center justify-center",
-                  isFullscreen ? "p-4 md:p-8 lg:p-12 min-h-[80vh]" : "p-8 md:p-12 lg:p-16",
+                  "text-center transition-all duration-700 flex flex-col items-center h-full w-full",
+                  isFullscreen ? "justify-center relative" : "justify-center p-8 md:p-12 lg:p-16",
                 )}
               >
                 {/* Timer Display */}
-                <div className="mb-8 md:mb-12">
+                <div className={cn("mb-8 md:mb-12", isFullscreen ? "flex flex-col justify-center items-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" : "")}>
                   <div
                     className={cn(
                       "font-black tracking-wider mb-2 md:mb-1 transition-all duration-700 leading-none select-none",
                       isFullscreen
-                        ? "text-xl sm:text-[12rem] md:text-[16rem] lg:text-[20rem] xl:text-[21rem]"
+                        ? "text-[10rem] sm:text-[16rem] md:text-[22rem] lg:text-[28rem] xl:text-[32rem] 2xl:text-[36rem]"
                         : "text-6xl sm:text-8xl md:text-[12rem] lg:text-[14rem] xl:text-[12rem]",
                       timer.isOvertime
                         ? isFullscreen
-                          ? "text-red-400 drop-shadow-2xl gentle-heartbeat-text" // Using gentle heartbeat animation
-                          : "text-red-500 gentle-heartbeat-text" // Using gentle heartbeat animation
-                        : isFullscreen
-                          ? "text-white drop-shadow-2xl"
-                          : "text-neutral-800",
+                          ? "text-white drop-shadow-2xl overtime-heartbeat-text"
+                          : "text-red-600 overtime-heartbeat-text"
+                        : isWarningTime
+                          ? isFullscreen
+                            ? "text-black drop-shadow-2xl warning-pulse-text"
+                            : "text-yellow-800 warning-pulse-text"
+                          : isFullscreen
+                            ? "text-white drop-shadow-2xl"
+                            : "text-neutral-800",
                     )}
                     style={{
+                      fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
+                      fontWeight: 900,
                       textShadow: isFullscreen
                         ? timer.isOvertime
-                          ? "0 0 40px rgba(220, 38, 38, 0.5), 0 0 60px rgba(234, 88, 12, 0.3)" // Softer glow for overtime
-                          : "0 0 80px rgba(0,0,0,0.5)"
+                          ? "0 0 50px rgba(255, 255, 255, 0.8), 0 0 100px rgba(220, 38, 38, 0.6)"
+                          : isWarningTime
+                            ? "0 0 40px rgba(0, 0, 0, 0.8), 0 0 80px rgba(245, 158, 11, 0.6)"
+                            : "0 0 80px rgba(0,0,0,0.5)"
                         : timer.isOvertime
-                          ? "0 0 20px rgba(220, 38, 38, 0.4)"
-                          : "0 4px 20px rgba(0,0,0,0.1)",
-                      fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
+                          ? "0 0 30px rgba(220, 38, 38, 0.6)"
+                          : isWarningTime
+                            ? "0 0 25px rgba(245, 158, 11, 0.6)"
+                            : "0 4px 20px rgba(0,0,0,0.1)",
                     }}
                   >
                     {formatTime(timer.minutes, timer.seconds)}
                   </div>
 
-                  {/* Status Text */}
-                  <div
-                    className={cn(
-                      "mb-3 md:mb-4 transition-all duration-700 font-bold",
-                      isFullscreen
-                        ? "text-sm md:text-xl lg:text-xl text-neutral-200"
-                        : "text-lg md:text-xl lg:text-2xl text-neutral-600",
-                      timer.isOvertime ? "animate-pulse" : "",
-                    )}
-                  >
-                    {timer.isOvertime ? (
-                      <span
-                        className={cn("font-black", isFullscreen ? "text-red-300" : "text-red-500")}
-                        style={{
-                          textShadow: "0 0 15px rgba(220, 38, 38, 0.5), 0 0 25px rgba(234, 88, 12, 0.3)",
-                          textShadow: "0 0 15px rgba(220, 38, 38, 0.5), 0 0 25px rgba(234, 88, 12, 0.3)",
-                        }}
-                      >
-                        ⚠️ OVERTIME ⚠️
-                      </span>
-                    ) : timer.isRunning ? (
-                      "FOCUS TIME"
-                    ) : (
-                      "READY TO START"
-                    )}
-                  </div>
+                  {/* Status Text - Only show in non-fullscreen */}
+                  {!isFullscreen && (
+                    <div
+                      className={cn(
+                        "mb-2 md:mb-3 transition-all duration-700 font-bold text-lg md:text-xl lg:text-2xl",
+                        timer.isOvertime
+                          ? "text-red-600 animate-pulse"
+                          : isWarningTime
+                            ? "text-yellow-800 animate-pulse"
+                            : "text-neutral-600",
+                      )}
+                    >
+                      {timer.isOvertime ? (
+                        <span
+                          className="font-black text-2xl md:text-3xl lg:text-4xl"
+                          style={{
+                            textShadow: "0 0 15px rgba(220, 38, 38, 0.6)",
+                          }}
+                        >
+                          🚨 OVERTIME 🚨
+                        </span>
+                      ) : isWarningTime ? (
+                        <span
+                          className="font-black text-xl md:text-2xl lg:text-3xl"
+                          style={{
+                            textShadow: "0 0 15px rgba(245, 158, 11, 0.6)",
+                          }}
+                        >
+                          ⚠️ FINAL MINUTES ⚠️
+                        </span>
+                      ) : timer.isRunning ? (
+                        "FOCUS TIME"
+                      ) : (
+                        "READY TO START"
+                      )}
+                    </div>
+                  )}
 
-                  {/* Session Name */}
-                  <div
-                    className={cn(
-                      "transition-all duration-700 font-semibold tracking-wide",
-                      isFullscreen
-                        ? "text-base md:text-xl lg:text-2xl text-neutral-400"
-                        : "text-sm md:text-base text-neutral-500",
-                    )}
-                    style={{
-                      fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    {sessionName}
-                  </div>
+                  {/* Session Name - Only show in non-fullscreen */}
+                  {!isFullscreen && (
+                    <div
+                      className={cn(
+                        "transition-all duration-700 font-semibold tracking-wide text-sm md:text-base",
+                        timer.isOvertime
+                          ? "text-red-500"
+                          : isWarningTime
+                            ? "text-yellow-700"
+                            : "text-neutral-500",
+                      )}
+                      style={{
+                        fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      {sessionName}
+                    </div>
+                  )}
                 </div>
 
                 {/* Control Buttons */}
-                <div className="flex items-center justify-center gap-4 md:gap-6 mb-6 md:mb-8">
+                <div className={cn(
+                  "flex items-center justify-center gap-4 md:gap-6 mb-6 md:mb-8",
+                  isFullscreen ? "hidden" : ""
+                )}>
                   <Button
                     onClick={toggleTimer}
                     size="lg"
                     className={cn(
                       "rounded-full transition-all duration-500 shadow-xl hover:shadow-2xl font-bold",
                       isFullscreen
-                        ? "w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32"
+                        ? "w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20"
                         : "w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24",
                       timer.isRunning
                         ? isFullscreen
@@ -500,13 +580,13 @@ export default function CountdownTimer() {
                     {timer.isRunning ? (
                       <Pause
                         className={cn(
-                          isFullscreen ? "w-8 h-8 md:w-12 md:h-12 lg:w-14 lg:h-14" : "w-6 h-6 md:w-8 md:h-8",
+                          isFullscreen ? "w-4 h-4 md:w-5 md:h-5" : "w-6 h-6 md:w-8 md:h-8",
                         )}
                       />
                     ) : (
                       <Play
                         className={cn(
-                          isFullscreen ? "w-8 h-8 md:w-12 md:h-12 lg:w-14 lg:h-14 ml-1" : "w-6 h-6 md:w-8 md:h-8 ml-1",
+                          isFullscreen ? "w-4 h-4 md:w-5 md:h-5 ml-1" : "w-6 h-6 md:w-8 md:h-8 ml-1",
                         )}
                       />
                     )}
@@ -519,13 +599,13 @@ export default function CountdownTimer() {
                     className={cn(
                       "rounded-full transition-all duration-500 shadow-lg hover:shadow-xl font-bold",
                       isFullscreen
-                        ? "w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 border-2 border-neutral-600 text-neutral-300 hover:bg-neutral-900 bg-transparent"
+                        ? "w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 border-2 border-neutral-600 text-neutral-300 hover:bg-neutral-900 bg-transparent"
                         : "w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 border-2 border-neutral-300 text-neutral-600 hover:bg-neutral-100 bg-transparent",
                       timer.isOvertime && isFullscreen ? "soft-glow" : "",
                     )}
                   >
                     <RotateCcw
-                      className={cn(isFullscreen ? "w-8 h-8 md:w-12 md:h-12 lg:w-14 lg:h-14" : "w-6 h-6 md:w-8 md:h-8")}
+                      className={cn(isFullscreen ? "w-4 h-4 md:w-5 md:h-5" : "w-6 h-6 md:w-8 md:h-8")}
                     />
                   </Button>
                 </div>
@@ -575,18 +655,110 @@ export default function CountdownTimer() {
                   </div>
                 )}
 
+                {/* Fullscreen Control Buttons - Bottom Sticky */}
                 {isFullscreen && (
-                  <div className="mt-8 md:mt-12">
-                    <Button
-                      onClick={toggleFullscreen}
-                      variant="ghost"
-                      size="lg"
-                      className="text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 px-4 md:px-6 py-2 md:py-3 rounded-full font-semibold"
-                    >
-                      <X className="w-4 md:w-5 h-4 md:h-5 mr-2" />
-                      Exit Immersive Mode
-                    </Button>
-                  </div>
+                  <>
+                    {/* Status Text and Session Name - Above Buttons */}
+                    <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-10 text-center opacity-60">
+                      {/* Status Text */}
+                      <div
+                        className={cn(
+                          "mb-1 transition-all duration-700 font-bold text-xs md:text-sm",
+                          timer.isOvertime
+                            ? "text-white animate-pulse"
+                            : isWarningTime
+                              ? "text-black animate-pulse"
+                              : "text-neutral-200",
+                        )}
+                      >
+                        {timer.isOvertime ? (
+                          <span
+                            className="font-black"
+                            style={{
+                              textShadow: "0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(220, 38, 38, 0.4)",
+                            }}
+                          >
+                            🚨 OVERTIME 🚨
+                          </span>
+                        ) : isWarningTime ? (
+                          <span
+                            className="font-black"
+                            style={{
+                              textShadow: "0 0 10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 158, 11, 0.4)",
+                            }}
+                          >
+                            ⚠️ FINAL MINUTES ⚠️
+                          </span>
+                        ) : timer.isRunning ? (
+                          "FOCUS TIME"
+                        ) : (
+                          "READY TO START"
+                        )}
+                      </div>
+
+                      {/* Session Name */}
+                      <div
+                        className={cn(
+                          "transition-all duration-700 font-medium tracking-wide text-xs",
+                          timer.isOvertime
+                            ? "text-red-200"
+                            : isWarningTime
+                              ? "text-yellow-800"
+                              : "text-neutral-400",
+                        )}
+                        style={{
+                          fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        {sessionName}
+                      </div>
+                    </div>
+
+                    {/* Control Buttons */}
+                    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex items-center gap-6">
+                      {/* Play/Pause Button */}
+                      <Button
+                        onClick={toggleTimer}
+                        size="sm"
+                        className={cn(
+                          "rounded-full transition-all duration-500 shadow-lg hover:shadow-xl font-bold w-14 h-14",
+                          timer.isRunning
+                            ? "bg-neutral-900 hover:bg-neutral-800 border-2 border-neutral-700"
+                            : "bg-emerald-700 hover:bg-emerald-600 border-2 border-emerald-500",
+                          timer.isOvertime ? "soft-glow" : "",
+                        )}
+                      >
+                        {timer.isRunning ? (
+                          <Pause className="w-5 h-5" />
+                        ) : (
+                          <Play className="w-5 h-5 ml-0.5" />
+                        )}
+                      </Button>
+
+                      {/* Reset Button */}
+                      <Button
+                        onClick={resetTimer}
+                        size="sm"
+                        className={cn(
+                          "rounded-full transition-all duration-500 shadow-lg hover:shadow-xl font-bold w-14 h-14 bg-neutral-900 hover:bg-neutral-800 border-2 border-neutral-700 text-white",
+                          timer.isOvertime ? "soft-glow" : "",
+                        )}
+                      >
+                        <RotateCcw className="w-5 h-5" />
+                      </Button>
+
+                      {/* Exit Button */}
+                      <Button
+                        onClick={toggleFullscreen}
+                        variant="ghost"
+                        size="sm"
+                        className="text-neutral-300 hover:text-neutral-100 hover:bg-neutral-900 bg-neutral-800/40 p-2 rounded-full font-semibold opacity-70 hover:opacity-100 w-10 h-10"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </>
                 )}
               </div>
             </Card>
