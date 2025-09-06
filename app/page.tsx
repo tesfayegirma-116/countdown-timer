@@ -32,9 +32,21 @@ export default function CountdownTimer() {
   const [showSettings, setShowSettings] = useState(false)
   const [showCustomTimer, setShowCustomTimer] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [sessionName, setSessionName] = useState("Focus Session")
-  const [showSidebar, setShowSidebar] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(false) // Declare showSidebar variable
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  const getCurrentDateString = () => {
+    const now = new Date()
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }
+    return now.toLocaleDateString("en-US", options)
+  }
+
+  const [sessionName, setSessionName] = useState(getCurrentDateString())
 
   // Format time display
   const formatTime = (minutes: number, seconds: number) => {
@@ -324,8 +336,8 @@ export default function CountdownTimer() {
                   className={cn(
                     "font-black tracking-wider mb-4 md:mb-6 transition-all duration-700 leading-none select-none",
                     isFullscreen
-                      ? "text-6xl sm:text-8xl md:text-9xl lg:text-[12rem] xl:text-[14rem] 2xl:text-[16rem]"
-                      : "text-4xl sm:text-6xl md:text-8xl lg:text-9xl xl:text-[8rem]",
+                      ? "text-7xl sm:text-9xl md:text-[10rem] lg:text-[13rem] xl:text-[15rem] 2xl:text-[17rem]"
+                      : "text-5xl sm:text-7xl md:text-9xl lg:text-[10rem] xl:text-[9rem]",
                     timer.isOvertime
                       ? isFullscreen
                         ? "text-red-400 drop-shadow-2xl animate-pulse"
@@ -369,6 +381,10 @@ export default function CountdownTimer() {
                       ? "text-base md:text-xl lg:text-2xl text-neutral-400"
                       : "text-sm md:text-base text-neutral-500",
                   )}
+                  style={{
+                    fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
+                    letterSpacing: "0.05em",
+                  }}
                 >
                   {sessionName}
                 </div>
