@@ -34,6 +34,7 @@ export default function CountdownTimer() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showSidebar, setShowSidebar] = useState(false) // Declare showSidebar variable
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const [flipTrigger, setFlipTrigger] = useState(0)
 
   const getCurrentDateString = () => {
     const now = new Date()
@@ -335,6 +336,28 @@ export default function CountdownTimer() {
           border: 2px solid rgba(220, 38, 38, 0.3);
           animation: soft-glow 3s ease-in-out infinite;
         }
+        
+        @keyframes flip-down {
+          0% {
+            transform: rotateX(0deg);
+          }
+          50% {
+            transform: rotateX(-90deg);
+          }
+          100% {
+            transform: rotateX(0deg);
+          }
+        }
+        
+        .flip-animation {
+          animation: flip-down 0.6s ease-in-out;
+          transform-style: preserve-3d;
+        }
+        
+        .digit-container {
+          perspective: 1000px;
+          display: inline-block;
+        }
       `}</style>
 
       <div
@@ -347,19 +370,21 @@ export default function CountdownTimer() {
                 ? "warning-pulse-bg text-black"
                 : "bg-black text-white"
             : timer.isOvertime
-              ? "bg-gradient-to-br from-red-100 via-red-50 to-red-100"
+              ? "bg-gradient-to-br from-red-50 via-white to-red-50"
               : isWarningTime
-                ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-yellow-100"
-                : "bg-gradient-to-br from-stone-50 via-neutral-50 to-amber-50/30",
+                ? "bg-gradient-to-br from-amber-50 via-white to-yellow-50"
+                : "bg-gradient-to-br from-slate-50 via-white to-blue-50",
         )}
       >
         {!isFullscreen && (
-          <div className="w-full flex justify-center pt-6 pb-4">
-            <img
-              src="https://zetseat.church/static/784249cfbfaf2b3892996cd64f064c82/d4cf7/logoEng.webp"
-              alt="Zetseat Church Logo"
-              className="h-12 md:h-16 lg:h-20 object-contain"
-            />
+          <div className="w-full flex justify-center pt-8 pb-6">
+            <div className="relative">
+              <img
+                src="https://zetseat.church/static/784249cfbfaf2b3892996cd64f064c82/d4cf7/logoEng.webp"
+                alt="Zetseat Church Logo"
+                className="relative h-16 md:h-20 lg:h-24 object-contain drop-shadow-lg"
+              />
+            </div>
           </div>
         )}
 
@@ -442,39 +467,40 @@ export default function CountdownTimer() {
             )}
 
             {/* Main Timer Display */}
-            <Card
+            <div
               className={cn(
-                "shadow-2xl transition-all duration-700 border-none w-full max-w-6xl",
-                isFullscreen ? "bg-transparent shadow-none" : "bg-white/95 backdrop-blur-md",
-                isFullscreen && timer.isOvertime ? "" : "",
-                !isFullscreen && timer.isOvertime ? "card-pulse" : "",
+                "transition-all duration-700 w-full",
+                isFullscreen ? "bg-transparent shadow-none" : "max-w-5xl mx-auto",
               )}
             >
               <div
                 className={cn(
                   "text-center transition-all duration-700 flex flex-col items-center h-full w-full",
-                  isFullscreen ? "justify-center relative" : "justify-center p-8 md:p-12 lg:p-16",
+                  isFullscreen ? "justify-center relative" : "justify-center py-12 md:py-16 lg:py-20",
                 )}
               >
                 {/* Timer Display */}
-                <div className={cn("mb-8 md:mb-12", isFullscreen ? "flex flex-col justify-center items-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" : "")}>
+                <div className={cn("mb-8 md:mb-12 relative", isFullscreen ? "flex flex-col justify-center items-center absolute inset-0" : "")}>
+                  {!isFullscreen && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-indigo-600/5 rounded-3xl blur-2xl transform scale-110 animate-pulse"></div>
+                  )}
                   <div
                     className={cn(
                       "font-black tracking-wider mb-2 md:mb-1 transition-all duration-700 leading-none select-none",
                       isFullscreen
-                        ? "text-[10rem] sm:text-[14rem] md:text-[20rem] lg:text-[24rem] xl:text-[30rem] 2xl:text-[33rem]"
+                        ? "text-6xl sm:text-[20xl] md:text-[22rem] lg:text-[24rem] xl:text-[32rem]"
                         : "text-6xl sm:text-8xl md:text-[12rem] lg:text-[14rem] xl:text-[12rem]",
                       timer.isOvertime
                         ? isFullscreen
-                          ? "text-white drop-shadow-2xl overtime-heartbeat-text"
-                          : "text-red-600 overtime-heartbeat-text"
+                          ? "text-white drop-shadow-2xl"
+                          : "text-red-600"
                         : isWarningTime
                           ? isFullscreen
-                            ? "text-black drop-shadow-2xl warning-pulse-text"
-                            : "text-yellow-800 warning-pulse-text"
+                            ? "text-black drop-shadow-2xl"
+                            : "text-amber-600"
                           : isFullscreen
                             ? "text-white drop-shadow-2xl"
-                            : "text-neutral-800",
+                            : "bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 bg-clip-text text-transparent",
                     )}
                     style={{
                       fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
@@ -499,12 +525,12 @@ export default function CountdownTimer() {
                   {!isFullscreen && (
                     <div
                       className={cn(
-                        "mb-2 md:mb-3 transition-all duration-700 font-bold text-lg md:text-xl lg:text-2xl",
+                        "mb-4 md:mb-6 transition-all duration-700 font-bold text-xl md:text-2xl lg:text-3xl relative z-10",
                         timer.isOvertime
-                          ? "text-red-600 animate-pulse"
+                          ? "text-red-600"
                           : isWarningTime
-                            ? "text-yellow-800 animate-pulse"
-                            : "text-neutral-600",
+                            ? "text-amber-600"
+                            : "bg-gradient-to-r from-slate-600 via-slate-700 to-slate-600 bg-clip-text text-transparent",
                       )}
                     >
                       {timer.isOvertime ? (
@@ -537,12 +563,12 @@ export default function CountdownTimer() {
                   {!isFullscreen && (
                     <div
                       className={cn(
-                        "transition-all duration-700 font-semibold tracking-wide text-sm md:text-base",
+                        "transition-all duration-700 font-medium tracking-wide text-base md:text-lg relative z-10",
                         timer.isOvertime
                           ? "text-red-500"
                           : isWarningTime
-                            ? "text-yellow-700"
-                            : "text-neutral-500",
+                            ? "text-amber-600"
+                            : "text-slate-500",
                       )}
                       style={{
                         fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
@@ -556,7 +582,7 @@ export default function CountdownTimer() {
 
                 {/* Control Buttons */}
                 <div className={cn(
-                  "flex items-center justify-center gap-4 md:gap-6 mb-6 md:mb-8",
+                  "flex items-center justify-center gap-6 md:gap-8 mb-8 md:mb-12 relative z-10",
                   isFullscreen ? "hidden" : ""
                 )}>
                   <Button
@@ -570,10 +596,10 @@ export default function CountdownTimer() {
                       timer.isRunning
                         ? isFullscreen
                           ? "bg-neutral-800 hover:bg-neutral-700 border-2 border-neutral-600"
-                          : "bg-neutral-700 hover:bg-neutral-800"
+                          : "bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 border-2 border-slate-600 text-white shadow-lg hover:shadow-xl"
                         : isFullscreen
                           ? "bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-400"
-                          : "bg-emerald-600 hover:bg-emerald-700",
+                          : "bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 border-2 border-emerald-500 text-white shadow-lg hover:shadow-xl",
                       timer.isOvertime && isFullscreen ? "soft-glow" : "",
                     )}
                   >
@@ -600,7 +626,7 @@ export default function CountdownTimer() {
                       "rounded-full transition-all duration-500 shadow-lg hover:shadow-xl font-bold",
                       isFullscreen
                         ? "w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 border-2 border-neutral-600 text-neutral-300 hover:bg-neutral-900 bg-transparent"
-                        : "w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 border-2 border-neutral-300 text-neutral-600 hover:bg-neutral-100 bg-transparent",
+                        : "w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 border-2 border-slate-300 text-slate-600 hover:bg-slate-50 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl",
                       timer.isOvertime && isFullscreen ? "soft-glow" : "",
                     )}
                   >
@@ -612,7 +638,7 @@ export default function CountdownTimer() {
 
                 {/* Secondary Controls - Hidden in fullscreen */}
                 {!isFullscreen && (
-                  <div className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
+                  <div className="flex items-center justify-center gap-3 md:gap-4 flex-wrap relative z-10">
                     {/* <Button
                       onClick={() => setShowSettings(!showSettings)}
                       variant="ghost"
@@ -627,7 +653,7 @@ export default function CountdownTimer() {
                       onClick={() => setShowCustomTimer(true)}
                       variant="ghost"
                       size="sm"
-                      className="text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 px-3 md:px-4 py-2 font-semibold"
+                      className="text-slate-600 hover:text-slate-800 hover:bg-slate-50 px-4 md:px-5 py-2.5 font-semibold rounded-xl transition-all duration-300 backdrop-blur-sm bg-white/60 border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md"
                     >
                       <Clock className="w-4 h-4 mr-2" />
                       Set Time
@@ -637,7 +663,7 @@ export default function CountdownTimer() {
                       onClick={() => setShowSidebar(true)}
                       variant="ghost"
                       size="sm"
-                      className="text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 px-3 md:px-4 py-2 font-semibold"
+                      className="text-slate-600 hover:text-slate-800 hover:bg-slate-50 px-4 md:px-5 py-2.5 font-semibold rounded-xl transition-all duration-300 backdrop-blur-sm bg-white/60 border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md"
                     >
                       <History className="w-4 h-4 mr-2" />
                       History
@@ -647,7 +673,7 @@ export default function CountdownTimer() {
                       onClick={toggleFullscreen}
                       variant="default"
                       size="sm"
-                      className="bg-neutral-800 hover:bg-neutral-900 text-white px-3 md:px-4 py-2 shadow-lg font-bold"
+                      className="bg-neutral-800 hover:bg-neutral-400 hover:shadow-2xl text-white px-3 md:px-4 py-2 shadow-lg font-bold"
                     >
                       <Maximize className="w-4 h-4 mr-2" />
                       Immersive Mode
@@ -761,7 +787,7 @@ export default function CountdownTimer() {
                   </>
                 )}
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Session History Sidebar - Hidden in fullscreen */}
