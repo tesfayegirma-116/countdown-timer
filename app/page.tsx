@@ -213,25 +213,25 @@ export default function CountdownTimer() {
   return (
     <div
       className={cn(
-        "min-h-screen flex items-center justify-center p-4 transition-all duration-500",
-        isFullscreen ? "bg-stone-900 text-white" : "bg-gradient-to-br from-stone-50 to-amber-50/30",
+        "min-h-screen flex items-center justify-center p-4 transition-all duration-700",
+        isFullscreen ? "bg-black text-white" : "bg-gradient-to-br from-neutral-50 via-stone-50 to-amber-50/20",
       )}
     >
       {isFullscreen && (
-        <div className="fixed top-4 right-4 z-10 text-stone-400 text-sm opacity-75 hover:opacity-100 transition-opacity">
+        <div className="fixed top-6 right-6 z-10 text-neutral-400 text-sm opacity-60 hover:opacity-100 transition-all duration-300">
           Press ESC or F to exit fullscreen
         </div>
       )}
 
       {isFullscreen && (
-        <div className="fixed bottom-4 left-4 z-10 text-stone-500 text-xs space-y-1 opacity-50 hover:opacity-100 transition-opacity">
+        <div className="fixed bottom-6 left-6 z-10 text-neutral-500 text-xs space-y-1 opacity-40 hover:opacity-100 transition-all duration-300">
           <div>SPACE - Start/Pause</div>
           <div>R - Reset</div>
           <div>F - Toggle Fullscreen</div>
         </div>
       )}
 
-      <div className={cn("w-full mx-auto", isFullscreen ? "max-w-4xl" : "max-w-2xl")}>
+      <div className={cn("w-full mx-auto", isFullscreen ? "max-w-6xl" : "max-w-3xl")}>
         {/* Custom Time Setter Modal */}
         {showCustomTimer && !isFullscreen && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -293,25 +293,32 @@ export default function CountdownTimer() {
         {/* Main Timer Display */}
         <Card
           className={cn(
-            "shadow-xl transition-all duration-500",
-            isFullscreen ? "bg-transparent border-none shadow-none" : "bg-white/90 backdrop-blur-sm border-stone-200",
+            "shadow-2xl transition-all duration-700 border-0",
+            isFullscreen ? "bg-transparent shadow-none" : "bg-white/95 backdrop-blur-md",
           )}
         >
-          <div className={cn("text-center transition-all duration-500", isFullscreen ? "p-16 md:p-24" : "p-8 md:p-12")}>
+          <div
+            className={cn("text-center transition-all duration-700", isFullscreen ? "p-20 md:p-32" : "p-12 md:p-16")}
+          >
             {/* Timer Display */}
-            <div className="mb-8">
+            <div className="mb-12">
               <div
                 className={cn(
-                  "font-mono font-light tracking-wider mb-4 transition-all duration-500",
-                  isFullscreen ? "text-[12rem] md:text-[16rem] lg:text-[20rem]" : "text-8xl md:text-9xl",
+                  "font-mono font-extralight tracking-widest mb-6 transition-all duration-700 leading-none",
+                  isFullscreen
+                    ? "text-[16rem] md:text-[24rem] lg:text-[32rem] xl:text-[40rem]"
+                    : "text-[8rem] md:text-[12rem] lg:text-[16rem]",
                   timer.isOvertime
                     ? isFullscreen
-                      ? "text-amber-400"
-                      : "text-amber-600"
+                      ? "text-amber-300 drop-shadow-2xl"
+                      : "text-amber-500"
                     : isFullscreen
-                      ? "text-white"
-                      : "text-stone-800",
+                      ? "text-white drop-shadow-2xl"
+                      : "text-neutral-800",
                 )}
+                style={{
+                  textShadow: isFullscreen ? "0 0 60px rgba(0,0,0,0.3)" : "none",
+                }}
               >
                 {formatTime(timer.minutes, timer.seconds)}
               </div>
@@ -319,12 +326,12 @@ export default function CountdownTimer() {
               {/* Status Text */}
               <div
                 className={cn(
-                  "mb-2 transition-all duration-500",
-                  isFullscreen ? "text-2xl md:text-3xl text-stone-300" : "text-lg md:text-xl text-stone-600",
+                  "mb-4 transition-all duration-700 font-light",
+                  isFullscreen ? "text-3xl md:text-5xl text-neutral-200" : "text-xl md:text-2xl text-neutral-600",
                 )}
               >
                 {timer.isOvertime ? (
-                  <span className={cn("font-medium", isFullscreen ? "text-amber-400" : "text-amber-600")}>
+                  <span className={cn("font-medium", isFullscreen ? "text-amber-300" : "text-amber-500")}>
                     Extra Time: +{formatTime(timer.minutes, timer.seconds)}
                   </span>
                 ) : timer.isRunning ? (
@@ -336,8 +343,8 @@ export default function CountdownTimer() {
 
               <div
                 className={cn(
-                  "transition-all duration-500",
-                  isFullscreen ? "text-lg text-stone-400" : "text-sm text-stone-500",
+                  "transition-all duration-700 font-light tracking-wide",
+                  isFullscreen ? "text-xl md:text-2xl text-neutral-400" : "text-base text-neutral-500",
                 )}
               >
                 {sessionName}
@@ -345,26 +352,28 @@ export default function CountdownTimer() {
             </div>
 
             {/* Control Buttons */}
-            <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="flex items-center justify-center gap-6 mb-8">
               <Button
                 onClick={toggleTimer}
                 size="lg"
                 className={cn(
-                  "rounded-full transition-all duration-300",
-                  isFullscreen ? "w-20 h-20 md:w-24 md:h-24" : "w-16 h-16",
+                  "rounded-full transition-all duration-500 shadow-xl hover:shadow-2xl",
+                  isFullscreen ? "w-28 h-28 md:w-36 md:h-36" : "w-20 h-20 md:w-24 md:h-24",
                   timer.isRunning
                     ? isFullscreen
-                      ? "bg-stone-700 hover:bg-stone-600"
-                      : "bg-stone-600 hover:bg-stone-700"
+                      ? "bg-neutral-800 hover:bg-neutral-700 border-2 border-neutral-600"
+                      : "bg-neutral-700 hover:bg-neutral-800"
                     : isFullscreen
-                      ? "bg-emerald-700 hover:bg-emerald-600"
+                      ? "bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-400"
                       : "bg-emerald-600 hover:bg-emerald-700",
                 )}
               >
                 {timer.isRunning ? (
-                  <Pause className={cn(isFullscreen ? "w-8 h-8 md:w-10 md:h-10" : "w-6 h-6")} />
+                  <Pause className={cn(isFullscreen ? "w-12 h-12 md:w-16 md:h-16" : "w-8 h-8 md:w-10 md:h-10")} />
                 ) : (
-                  <Play className={cn(isFullscreen ? "w-8 h-8 md:w-10 md:h-10 ml-1" : "w-6 h-6 ml-1")} />
+                  <Play
+                    className={cn(isFullscreen ? "w-12 h-12 md:w-16 md:h-16 ml-2" : "w-8 h-8 md:w-10 md:h-10 ml-1")}
+                  />
                 )}
               </Button>
 
@@ -373,24 +382,24 @@ export default function CountdownTimer() {
                 variant="outline"
                 size="lg"
                 className={cn(
-                  "rounded-full transition-all duration-300",
+                  "rounded-full transition-all duration-500 shadow-lg hover:shadow-xl",
                   isFullscreen
-                    ? "w-20 h-20 md:w-24 md:h-24 border-stone-600 text-stone-300 hover:bg-stone-800 bg-transparent"
-                    : "w-16 h-16 border-stone-300 text-stone-600 hover:bg-stone-100 bg-transparent",
+                    ? "w-28 h-28 md:w-36 md:h-36 border-2 border-neutral-600 text-neutral-300 hover:bg-neutral-900 bg-transparent"
+                    : "w-20 h-20 md:w-24 md:h-24 border-2 border-neutral-300 text-neutral-600 hover:bg-neutral-100 bg-transparent",
                 )}
               >
-                <RotateCcw className={cn(isFullscreen ? "w-8 h-8 md:w-10 md:h-10" : "w-6 h-6")} />
+                <RotateCcw className={cn(isFullscreen ? "w-12 h-12 md:w-16 md:h-16" : "w-8 h-8 md:w-10 md:h-10")} />
               </Button>
             </div>
 
             {/* Secondary Controls - Hidden in fullscreen */}
             {!isFullscreen && (
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-3 flex-wrap">
                 <Button
                   onClick={() => setShowSettings(!showSettings)}
                   variant="ghost"
                   size="sm"
-                  className="text-stone-500 hover:text-stone-700"
+                  className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 px-4 py-2"
                 >
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
@@ -400,7 +409,7 @@ export default function CountdownTimer() {
                   onClick={() => setShowCustomTimer(true)}
                   variant="ghost"
                   size="sm"
-                  className="text-stone-500 hover:text-stone-700"
+                  className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 px-4 py-2"
                 >
                   <Clock className="w-4 h-4 mr-2" />
                   Set Time
@@ -410,7 +419,7 @@ export default function CountdownTimer() {
                   onClick={() => setShowSidebar(true)}
                   variant="ghost"
                   size="sm"
-                  className="text-stone-500 hover:text-stone-700"
+                  className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 px-4 py-2"
                 >
                   <History className="w-4 h-4 mr-2" />
                   History
@@ -418,26 +427,26 @@ export default function CountdownTimer() {
 
                 <Button
                   onClick={toggleFullscreen}
-                  variant="ghost"
+                  variant="default"
                   size="sm"
-                  className="text-stone-500 hover:text-stone-700"
+                  className="bg-neutral-800 hover:bg-neutral-900 text-white px-4 py-2 shadow-lg"
                 >
                   <Maximize className="w-4 h-4 mr-2" />
-                  Fullscreen
+                  Immersive Mode
                 </Button>
               </div>
             )}
 
             {isFullscreen && (
-              <div className="mt-8">
+              <div className="mt-12">
                 <Button
                   onClick={toggleFullscreen}
                   variant="ghost"
-                  size="sm"
-                  className="text-stone-400 hover:text-stone-200"
+                  size="lg"
+                  className="text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 px-6 py-3 rounded-full"
                 >
-                  <X className="w-4 h-4 mr-2" />
-                  Exit Fullscreen
+                  <X className="w-5 h-5 mr-2" />
+                  Exit Immersive Mode
                 </Button>
               </div>
             )}
