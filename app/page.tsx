@@ -368,12 +368,16 @@ export default function CountdownTimer() {
               ? "overtime-pulse-bg text-white"
               : isWarningTime
                 ? "warning-pulse-bg text-black"
-                : "bg-black text-white"
+                : timer.isRunning
+                  ? "bg-white text-black"
+                  : "bg-black text-white"
             : timer.isOvertime
               ? "bg-gradient-to-br from-red-50 via-white to-red-50"
               : isWarningTime
                 ? "bg-gradient-to-br from-amber-50 via-white to-yellow-50"
-                : "bg-gradient-to-br from-slate-50 via-white to-blue-50",
+                : timer.isRunning
+                  ? "bg-white"
+                  : "bg-gradient-to-br from-slate-50 via-white to-blue-50",
         )}
       >
         {!isFullscreen && (
@@ -499,8 +503,12 @@ export default function CountdownTimer() {
                             ? "text-black drop-shadow-2xl"
                             : "text-amber-600"
                           : isFullscreen
-                            ? "text-white drop-shadow-2xl"
-                            : "bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 bg-clip-text text-transparent",
+                            ? timer.isRunning
+                              ? "text-black drop-shadow-2xl"
+                              : "text-white drop-shadow-2xl"
+                            : timer.isRunning
+                              ? "text-black"
+                              : "bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 bg-clip-text text-transparent",
                     )}
                     style={{
                       fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
@@ -510,12 +518,16 @@ export default function CountdownTimer() {
                           ? "0 0 50px rgba(255, 255, 255, 0.8), 0 0 100px rgba(220, 38, 38, 0.6)"
                           : isWarningTime
                             ? "0 0 40px rgba(0, 0, 0, 0.8), 0 0 80px rgba(245, 158, 11, 0.6)"
-                            : "0 0 80px rgba(0,0,0,0.5)"
+                            : timer.isRunning
+                              ? "0 0 80px rgba(255,255,255,0.5)"
+                              : "0 0 80px rgba(0,0,0,0.5)"
                         : timer.isOvertime
                           ? "0 0 30px rgba(220, 38, 38, 0.6)"
                           : isWarningTime
                             ? "0 0 25px rgba(245, 158, 11, 0.6)"
-                            : "0 4px 20px rgba(0,0,0,0.1)",
+                            : timer.isRunning
+                              ? "0 4px 20px rgba(0,0,0,0.2)"
+                              : "0 4px 20px rgba(0,0,0,0.1)",
                     }}
                   >
                     {formatTime(timer.minutes, timer.seconds)}
@@ -530,7 +542,9 @@ export default function CountdownTimer() {
                           ? "text-red-600"
                           : isWarningTime
                             ? "text-amber-600"
-                            : "bg-gradient-to-r from-slate-600 via-slate-700 to-slate-600 bg-clip-text text-transparent",
+                            : timer.isRunning
+                              ? "text-slate-800"
+                              : "bg-gradient-to-r from-slate-600 via-slate-700 to-slate-600 bg-clip-text text-transparent",
                       )}
                     >
                       {timer.isOvertime ? (
@@ -568,7 +582,9 @@ export default function CountdownTimer() {
                           ? "text-red-500"
                           : isWarningTime
                             ? "text-amber-600"
-                            : "text-slate-500",
+                            : timer.isRunning
+                              ? "text-slate-600"
+                              : "text-slate-500",
                       )}
                       style={{
                         fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
