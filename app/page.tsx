@@ -291,7 +291,7 @@ export default function CountdownTimer() {
 
       <div
         className={cn(
-          "min-h-screen flex flex-col transition-all duration-700",
+          "min-h-screen w-full flex flex-col transition-all duration-700 overflow-hidden",
           isFullscreen
             ? timer.isOvertime
               ? "gentle-pulse-bg text-white" // Using gentle pulse animation class
@@ -309,7 +309,7 @@ export default function CountdownTimer() {
           </div>
         )}
 
-        <div className="flex-1 flex items-center justify-center p-4">
+        <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
           {isFullscreen && (
             <div className="fixed top-4 right-4 z-10 text-neutral-400 text-xs md:text-sm opacity-60 hover:opacity-100 transition-all duration-300">
               Press ESC or F to exit fullscreen
@@ -324,7 +324,12 @@ export default function CountdownTimer() {
             </div>
           )}
 
-          <div className={cn("w-full mx-auto", isFullscreen ? "max-w-7xl" : "max-w-4xl")}>
+          <div
+            className={cn(
+              "w-full mx-auto flex items-center justify-center",
+              isFullscreen ? "max-w-none h-full" : "max-w-4xl",
+            )}
+          >
             {/* Custom Time Setter Modal */}
             {showCustomTimer && !isFullscreen && (
               <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -386,7 +391,7 @@ export default function CountdownTimer() {
             {/* Main Timer Display */}
             <Card
               className={cn(
-                "shadow-2xl transition-all duration-700 border-0",
+                "shadow-2xl transition-all duration-700 border-0 w-full max-w-6xl",
                 isFullscreen ? "bg-transparent shadow-none" : "bg-white/95 backdrop-blur-md",
                 isFullscreen && timer.isOvertime ? "gentle-border" : "",
                 !isFullscreen && timer.isOvertime ? "card-pulse" : "",
@@ -394,8 +399,8 @@ export default function CountdownTimer() {
             >
               <div
                 className={cn(
-                  "text-center transition-all duration-700",
-                  isFullscreen ? "p-8 md:p-16 lg:p-20" : "p-8 md:p-12 lg:p-16",
+                  "text-center transition-all duration-700 flex flex-col items-center justify-center",
+                  isFullscreen ? "p-4 md:p-8 lg:p-12 min-h-[80vh]" : "p-8 md:p-12 lg:p-16",
                 )}
               >
                 {/* Timer Display */}
@@ -440,8 +445,9 @@ export default function CountdownTimer() {
                   >
                     {timer.isOvertime ? (
                       <span
-                        className={cn("font-black", isFullscreen ? "text-red-400" : "text-red-500")}
+                        className={cn("font-black", isFullscreen ? "text-red-300" : "text-red-500")}
                         style={{
+                          textShadow: "0 0 15px rgba(220, 38, 38, 0.5), 0 0 25px rgba(234, 88, 12, 0.3)",
                           textShadow: "0 0 15px rgba(220, 38, 38, 0.5), 0 0 25px rgba(234, 88, 12, 0.3)",
                         }}
                       >
