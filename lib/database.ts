@@ -77,6 +77,13 @@ export function deleteTimerSession(id: number): boolean {
   return result.changes > 0
 }
 
+//curl -X DELETE http://localhost:3000/api/clear-data
+export function clearAllTimerSessions(): number {
+  const stmt = db.prepare("DELETE FROM timer_sessions")
+  const result = stmt.run()
+  return result.changes
+}
+
 // Graceful shutdown - only add listeners if not already present
 const closeHandler = () => db.close()
 const exitHandler = (signal: number) => () => process.exit(128 + signal)
