@@ -1,4 +1,4 @@
-# ⏳ Countdown Timer
+# Countdown Timer
 
 A super simple and cool countdown timer app!
 
