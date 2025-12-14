@@ -9,6 +9,15 @@ import { Play, Pause, RotateCcw, Maximize, History, X, Clock } from "lucide-reac
 import { SessionHistorySidebar } from "@/components/session-history-sidebar"
 import { CustomTimeSetter } from "@/components/custom-time-setter"
 import { cn } from "@/lib/utils"
+import { 
+  sendTimerNotification, 
+  updateTrayTooltip, 
+  setupTrayEventListeners, 
+  setupMenuEventListeners,
+  setupWindowStateManagement,
+  registerGlobalShortcuts,
+  isTauri
+} from "@/lib/tauri-features"
 
 interface TimerState {
   minutes: number
@@ -48,6 +57,9 @@ export default function CountdownTimer() {
   }
 
   const [sessionName, setSessionName] = useState(getCurrentDateString())
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  const [hasShownWarning, setHasShownWarning] = useState(false)
+  const [hasShownOvertime, setHasShownOvertime] = useState(false)
 
   // Format time display
   const formatTime = (minutes: number, seconds: number) => {
@@ -61,19 +73,41 @@ export default function CountdownTimer() {
   const isWarningTime = !timer.isOvertime && timer.isRunning && totalSeconds <= 300 && totalSeconds > 0
 
   // Start/Stop timer
-  const toggleTimer = () => {
+  const toggleTimer = async () => {
     if (timer.isRunning) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
       setTimer((prev) => ({ ...prev, isRunning: false }))
+      
+      // Send pause notification
+      if (isTauri() && notificationsEnabled) {
+        try {
+          await sendTimerNotification('paused', sessionName)
+        } catch (error) {
+          console.error('Failed to send pause notification:', error)
+        }
+      }
     } else {
       setTimer((prev) => ({
         ...prev,
         isRunning: true,
         startTime: prev.startTime || Date.now(),
       }))
+      
+      // Reset notification flags when starting
+      setHasShownWarning(false)
+      setHasShownOvertime(false)
+      
+      // Send start notification
+      if (isTauri() && notificationsEnabled) {
+        try {
+          await sendTimerNotification('started', sessionName)
+        } catch (error) {
+          console.error('Failed to send start notification:', error)
+        }
+      }
     }
   }
 
@@ -90,20 +124,28 @@ export default function CountdownTimer() {
       const extraTime = timer.isOvertime ? totalSeconds : 0
 
       try {
-        await fetch("/api/timer-sessions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            session_name: sessionName,
-            target_duration: timer.targetDuration,
-            actual_duration: actualDuration,
-            extra_time: extraTime,
-          }),
+        const { saveTimerSession } = await import("@/lib/database-client")
+        await saveTimerSession({
+          session_name: sessionName,
+          target_duration: timer.targetDuration,
+          actual_duration: actualDuration,
+          extra_time: extraTime,
         })
       } catch (error) {
         console.error("Failed to save session:", error)
+      }
+      
+      // Send completion notification if timer was completed
+      if (isTauri() && notificationsEnabled) {
+        try {
+          if (timer.isOvertime) {
+            await sendTimerNotification('completed', sessionName)
+          } else {
+            await sendTimerNotification('reset', sessionName)
+          }
+        } catch (error) {
+          console.error('Failed to send completion notification:', error)
+        }
       }
     }
 
@@ -115,6 +157,10 @@ export default function CountdownTimer() {
       targetDuration: timer.targetDuration,
       startTime: null,
     })
+    
+    // Reset notification flags
+    setHasShownWarning(false)
+    setHasShownOvertime(false)
   }
 
   const setCustomTime = (minutes: number, seconds = 0) => {
@@ -138,6 +184,10 @@ export default function CountdownTimer() {
         setTimer((prev) => {
           if (prev.minutes === 0 && prev.seconds === 0 && !prev.isOvertime) {
             // Timer reached zero, start overtime
+            if (isTauri() && notificationsEnabled && !hasShownOvertime) {
+              sendTimerNotification('completed', sessionName).catch(console.error)
+              setHasShownOvertime(true)
+            }
             return {
               ...prev,
               minutes: 0,
@@ -176,16 +226,57 @@ export default function CountdownTimer() {
         clearInterval(intervalRef.current)
       }
     }
-  }, [timer.isRunning])
+  }, [timer.isRunning, sessionName, notificationsEnabled, hasShownWarning, hasShownOvertime])
 
-  // Fullscreen toggle
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen()
-      setIsFullscreen(true)
+  // Update tray tooltip with current timer status
+  useEffect(() => {
+    if (isTauri()) {
+      const updateTray = async () => {
+        try {
+          const timeDisplay = formatTime(timer.minutes, timer.seconds)
+          const status = timer.isRunning ? 
+            (timer.isOvertime ? 'Overtime' : 'Running') : 
+            'Paused'
+          const tooltip = `${sessionName} - ${timeDisplay} (${status})`
+          await updateTrayTooltip(tooltip)
+        } catch (error) {
+          console.error('Failed to update tray tooltip:', error)
+        }
+      }
+      updateTray()
+    }
+  }, [timer.minutes, timer.seconds, timer.isRunning, timer.isOvertime, sessionName])
+
+  // Warning notification effect
+  useEffect(() => {
+    if (isWarningTime && !hasShownWarning && isTauri() && notificationsEnabled) {
+      sendTimerNotification('warning', sessionName).catch(console.error)
+      setHasShownWarning(true)
+    }
+  }, [isWarningTime, hasShownWarning, sessionName, notificationsEnabled])
+
+  // Fullscreen toggle - supports both Tauri and browser
+  const toggleFullscreen = async () => {
+    // Check if we're in Tauri environment
+    if (typeof window !== 'undefined' && '__TAURI__' in window) {
+      try {
+        const { getCurrentWindow } = await import('@tauri-apps/api/window')
+        const appWindow = getCurrentWindow()
+        const isCurrentlyFullscreen = await appWindow.isFullscreen()
+        await appWindow.setFullscreen(!isCurrentlyFullscreen)
+        setIsFullscreen(!isCurrentlyFullscreen)
+      } catch (error) {
+        console.error('Failed to toggle fullscreen in Tauri:', error)
+      }
     } else {
-      document.exitFullscreen()
-      setIsFullscreen(false)
+      // Browser fallback
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen()
+        setIsFullscreen(true)
+      } else {
+        document.exitFullscreen()
+        setIsFullscreen(false)
+      }
     }
   }
 
@@ -222,15 +313,87 @@ export default function CountdownTimer() {
     return () => document.removeEventListener("keydown", handleKeyPress)
   }, [timer.isRunning, showSettings, showCustomTimer, isFullscreen])
 
-  // Listen for fullscreen changes
+  // Listen for fullscreen changes (browser only)
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
+      if (typeof window !== 'undefined' && !('__TAURI__' in window)) {
+        setIsFullscreen(!!document.fullscreenElement)
+      }
     }
 
     document.addEventListener("fullscreenchange", handleFullscreenChange)
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange)
   }, [])
+
+  // Initialize Tauri features
+  useEffect(() => {
+    if (isTauri()) {
+      const initializeTauri = async () => {
+        try {
+          // Setup window state management
+          await setupWindowStateManagement()
+          
+          // Register global shortcuts
+          await registerGlobalShortcuts()
+          
+          // Setup tray event listeners
+          setupTrayEventListeners(
+            toggleTimer,
+            toggleTimer,
+            resetTimer,
+            toggleFullscreen
+          )
+          
+          // Setup menu event listeners
+          setupMenuEventListeners(
+            toggleTimer,
+            resetTimer,
+            setCustomTime,
+            () => setShowCustomTimer(true),
+            toggleFullscreen,
+            () => setShowSidebar(true),
+            () => {
+              // New session - reset to default state
+              setSessionName(getCurrentDateString())
+              setCustomTime(25)
+            }
+          )
+          
+          // Check notification permissions
+          const { checkNotificationPermission } = await import('@/lib/tauri-features')
+          const hasPermission = await checkNotificationPermission()
+          setNotificationsEnabled(hasPermission)
+          
+        } catch (error) {
+          console.error('Failed to initialize Tauri features:', error)
+        }
+      }
+      
+      initializeTauri()
+    }
+  }, [])
+
+  // Listen for global shortcut events
+  useEffect(() => {
+    const handleGlobalShortcuts = (event: CustomEvent) => {
+      switch (event.type) {
+        case 'global-shortcut-toggle-timer':
+          toggleTimer()
+          break
+        case 'global-shortcut-reset-timer':
+          resetTimer()
+          break
+      }
+    }
+
+    window.addEventListener('global-shortcut-toggle-timer', handleGlobalShortcuts as EventListener)
+    window.addEventListener('global-shortcut-reset-timer', handleGlobalShortcuts as EventListener)
+    
+    return () => {
+      window.removeEventListener('global-shortcut-toggle-timer', handleGlobalShortcuts as EventListener)
+      window.removeEventListener('global-shortcut-reset-timer', handleGlobalShortcuts as EventListener)
+    }
+  }, [toggleTimer, resetTimer])
 
   return (
     <>

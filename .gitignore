@@ -31,3 +31,7 @@ prisma/migrations
 *.db
 *.db-shm
 *.db-wal
+
+# tauri
+/src-tauri/target
+/src-tauri/Cargo.lock

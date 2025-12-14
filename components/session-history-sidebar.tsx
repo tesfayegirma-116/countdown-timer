@@ -46,9 +46,9 @@ export function SessionHistorySidebar({ isOpen, onClose }: SessionHistorySidebar
   const loadSessions = async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/timer-sessions")
-      const data = await response.json()
-      setSessions(data.sessions || [])
+      const { getTimerSessions } = await import("@/lib/database-client")
+      const sessions = await getTimerSessions()
+      setSessions(sessions || [])
     } catch (error) {
       console.error("Failed to load sessions:", error)
       setSessions([])
@@ -66,11 +66,10 @@ export function SessionHistorySidebar({ isOpen, onClose }: SessionHistorySidebar
 
     try {
       setDeletingId(sessionId)
-      const response = await fetch(`/api/timer-sessions?id=${sessionId}`, {
-        method: "DELETE",
-      })
+      const { deleteTimerSession } = await import("@/lib/database-client")
+      const success = await deleteTimerSession(sessionId)
 
-      if (response.ok) {
+      if (success) {
         setSessions(sessions.filter(session => session.id !== sessionId))
         if (selectedSession?.id === sessionId) {
           setSelectedSession(null)

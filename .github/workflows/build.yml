@@ -1,0 +1,141 @@
+name: Build and Release
+
+on:
+    push:
+        branches: [main]
+        tags: ["v*"]
+    pull_request:
+        branches: [main]
+
+env:
+    CARGO_TERM_COLOR: always
+
+jobs:
+    build:
+        strategy:
+            matrix:
+                platform: [ubuntu-20.04, windows-latest, macos-latest]
+                include:
+                    - platform: ubuntu-20.04
+                      rust_target: x86_64-unknown-linux-gnu
+                    - platform: windows-latest
+                      rust_target: x86_64-pc-windows-msvc
+                    - platform: macos-latest
+                      rust_target: x86_64-apple-darwin
+
+        runs-on: ${{ matrix.platform }}
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "18"
+                  cache: "npm"
+
+            - name: Setup Rust
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  targets: ${{ matrix.rust_target }}
+
+            - name: Rust cache
+              uses: swatinem/rust-cache@v2
+              with:
+                  workspaces: "./src-tauri -> target"
+
+            - name: Install system dependencies (Ubuntu)
+              if: matrix.platform == 'ubuntu-20.04'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+
+            - name: Install frontend dependencies
+              run: npm ci
+
+            - name: Build frontend
+              run: npm run build
+
+            - name: Build Tauri app
+              run: npm run tauri:build
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload artifacts (Linux)
+              if: matrix.platform == 'ubuntu-20.04'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: linux-artifacts
+                  path: |
+                      src-tauri/target/release/bundle/deb/*.deb
+                      src-tauri/target/release/bundle/rpm/*.rpm
+                      src-tauri/target/release/bundle/appimage/*.AppImage
+
+            - name: Upload artifacts (Windows)
+              if: matrix.platform == 'windows-latest'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: windows-artifacts
+                  path: |
+                      src-tauri/target/release/bundle/msi/*.msi
+                      src-tauri/target/release/bundle/nsis/*.exe
+
+            - name: Upload artifacts (macOS)
+              if: matrix.platform == 'macos-latest'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: macos-artifacts
+                  path: |
+                      src-tauri/target/release/bundle/dmg/*.dmg
+                      src-tauri/target/release/bundle/macos/*.app
+
+    release:
+        if: startsWith(github.ref, 'refs/tags/v')
+        needs: build
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Download all artifacts
+              uses: actions/download-artifact@v4
+
+            - name: Create Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: |
+                      linux-artifacts/**/*
+                      windows-artifacts/**/*
+                      macos-artifacts/**/*
+                  generate_release_notes: true
+                  draft: false
+                  prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "18"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run tests
+              run: npm run test --if-present
+
+            - name: Run linting
+              run: npm run lint --if-present
+
+            - name: Type check
+              run: npx tsc --noEmit --if-present
