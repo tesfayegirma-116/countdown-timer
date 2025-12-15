@@ -48,6 +48,19 @@ pub fn run() {
         // .plugin(tauri_plugin_updater::Builder::new().build())
         .on_menu_event(|app, event| handle_menu_event(app, event))
         .setup(|app| {
+            // Always enable logging to file, even in release
+            // This MUST be the first thing initialized to catch startup errors
+            app.handle().plugin(
+                tauri_plugin_log::Builder::default()
+                    .targets([
+                        tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout),
+                        tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir { file_name: Some("app.log".into()) }),
+                        tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Webview),
+                    ])
+                    .level(log::LevelFilter::Info)
+                    .build(),
+            )?;
+
             let handle = app.handle();
 
             // Initialize system tray
@@ -66,22 +79,17 @@ pub fn run() {
                 .join("zetseat-church-timer")
                 .join("timer_sessions.db");
 
-            let database = Database::new(db_path).expect("Failed to initialize database");
+            log::info!("Initializing database at: {:?}", db_path);
 
-            app.manage(database);
-
-            // Register global shortcut string (for redundancy or if plugin doesn't catch it from builder automatically without explicit register call - which it usually does if constructed with `with_shortcut`)
-            let ctrl_shift_t = "CmdOrCtrl+Shift+T";
-            if let Err(e) = app.global_shortcut().register(ctrl_shift_t) {
-                log::warn!("Failed to register global shortcut: {}", e);
-            }
-
-            if cfg!(debug_assertions) {
-                app.handle().plugin(
-                    tauri_plugin_log::Builder::default()
-                        .level(log::LevelFilter::Info)
-                        .build(),
-                )?;
+            match Database::new(db_path.clone()) {
+                Ok(database) => {
+                    app.manage(database);
+                    log::info!("Database initialized successfully");
+                }
+                Err(e) => {
+                    log::error!("Failed to initialize database: {}", e);
+                     panic!("Failed to initialize database: {}", e);
+                }
             }
 
             // Check for updates on startup (async)

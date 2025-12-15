@@ -81,6 +81,55 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Check for Windows cross-compilation requirements on Linux
+if [[ "$(uname)" == "Linux" ]]; then
+    if [[ "$TARGET" == *"windows-msvc"* ]]; then
+        print_error "Building for Windows MSVC target on Linux is not supported out-of-the-box."
+        print_warning "The MSVC toolchain is proprietary and generally requires Windows."
+        print_warning "For Linux -> Windows cross-compilation, use the GNU target instead:"
+        print_status "  $0 --target x86_64-pc-windows-gnu"
+        echo ""
+        print_warning "If you must use MSVC, ensure you have set up 'cargo-xwin' or similar tools."
+        read -p "Do you want to switch to x86_64-pc-windows-gnu? (Y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Nn]$ ]]; then
+            print_warning "Continuing with MSVC build (expect failure if tools are missing)..."
+        else
+            TARGET="x86_64-pc-windows-gnu"
+            print_status "Switched target to: $TARGET"
+        fi
+    fi
+
+    if [[ "$TARGET" == *"windows-gnu"* ]]; then
+        MISSING_DEPS=false
+        
+        # Check for Rust target
+        if ! rustup target list --installed | grep -q "x86_64-pc-windows-gnu"; then
+            print_status "Installing Rust target x86_64-pc-windows-gnu..."
+            rustup target add x86_64-pc-windows-gnu
+        fi
+        
+        # Check for MinGW
+        if ! command -v x86_64-w64-mingw32-gcc &> /dev/null; then
+            print_error "MinGW-w64 toolchain is missing!"
+            echo "Please install it using:"
+            echo "  sudo apt-get install mingw-w64"
+            MISSING_DEPS=true
+        fi
+
+        # Check for NSIS
+        if ! command -v makensis &> /dev/null; then
+            print_warning "NSIS is missing! You won't be able to build the installer (.exe/.msi)."
+            echo "Please install it using:"
+            echo "  sudo apt-get install nsis"
+        fi
+        
+        if [ "$MISSING_DEPS" = true ]; then
+            exit 1
+        fi
+    fi
+fi
+
 # Clean build artifacts if requested
 if [ "$CLEAN_BUILD" = true ]; then
     print_status "Cleaning build artifacts..."
