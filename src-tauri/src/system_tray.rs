@@ -1,6 +1,6 @@
 use tauri::{
-    AppHandle, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, 
-    SystemTrayMenuItem, SystemTraySubmenu, Window
+    AppHandle, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
+    SystemTrayMenuItem, SystemTraySubmenu, Window,
 };
 
 pub fn create_system_tray() -> SystemTray {
@@ -29,7 +29,9 @@ pub fn create_system_tray() -> SystemTray {
         .add_native_item(separator3)
         .add_item(quit);
 
-    SystemTray::new().with_menu(tray_menu).with_tooltip("Zetseat Church Timer")
+    SystemTray::new()
+        .with_menu(tray_menu)
+        .with_tooltip("Zetseat Church Timer")
 }
 
 pub fn handle_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
@@ -118,10 +120,14 @@ pub fn handle_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
 
 #[tauri::command]
 pub fn update_tray_tooltip(app: AppHandle, tooltip: String) -> Result<(), String> {
-    app.tray_handle().set_tooltip(&tooltip).map_err(|e| e.to_string())
+    app.tray_handle()
+        .set_tooltip(&tooltip)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub fn update_tray_title(app: AppHandle, title: String) -> Result<(), String> {
-    app.tray_handle().set_title(&title).map_err(|e| e.to_string())
+    app.tray_handle()
+        .set_title(&title)
+        .map_err(|e| e.to_string())
 }
