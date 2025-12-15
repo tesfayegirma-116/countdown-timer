@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager, Window};
+use tauri::Window;
 
 #[tauri::command]
 pub fn minimize_window(window: Window) -> Result<(), String> {
@@ -24,6 +24,7 @@ pub fn toggle_always_on_top(window: Window) -> Result<bool, String> {
     Ok(new_state)
 }
 
+#[allow(dead_code)]
 #[tauri::command]
 pub fn set_window_size(window: Window, width: f64, height: f64) -> Result<(), String> {
     window.set_size(tauri::Size::Physical(tauri::PhysicalSize { width: width as u32, height: height as u32 }))

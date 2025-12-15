@@ -1,7 +1,7 @@
-use tauri::{AppHandle, Manager};
-use serde::{Deserialize, Serialize};
+use tauri::AppHandle;
+use tauri_plugin_notification::NotificationExt;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct NotificationPayload {
     pub title: String,
     pub body: String,
@@ -14,24 +14,20 @@ pub async fn send_notification(
     app: AppHandle,
     payload: NotificationPayload,
 ) -> Result<(), String> {
-    let notification = tauri_plugin_notification::NotificationBuilder::new()
+    let mut notification = app.notification().builder()
         .title(&payload.title)
         .body(&payload.body);
 
-    let notification = if let Some(icon) = &payload.icon {
-        notification.icon(icon)
-    } else {
-        notification
-    };
+    if let Some(icon) = &payload.icon {
+        notification = notification.icon(icon.clone());
+    }
 
-    let notification = if let Some(sound) = &payload.sound {
-        notification.sound(sound)
-    } else {
-        notification
-    };
+    if let Some(sound) = &payload.sound {
+        notification = notification.sound(sound.clone());
+    }
 
     notification
-        .show(&app)
+        .show()
         .map_err(|e| e.to_string())?;
 
     Ok(())
@@ -39,26 +35,27 @@ pub async fn send_notification(
 
 #[tauri::command]
 pub async fn request_notification_permission(app: AppHandle) -> Result<bool, String> {
-    match tauri_plugin_notification::request_permission(&app).await {
-        Ok(permission) => Ok(permission == tauri_plugin_notification::Permission::Granted),
+    match app.notification().request_permission() {
+        Ok(permission) => Ok(permission == tauri_plugin_notification::PermissionState::Granted),
         Err(e) => Err(e.to_string()),
     }
 }
 
 #[tauri::command]
 pub async fn check_notification_permission(app: AppHandle) -> Result<bool, String> {
-    match tauri_plugin_notification::check_permissions(&app).await {
-        Ok(permission) => Ok(permission == tauri_plugin_notification::Permission::Granted),
+    match app.notification().permission_state() {
+        Ok(permission) => Ok(permission == tauri_plugin_notification::PermissionState::Granted),
         Err(e) => Err(e.to_string()),
     }
 }
 
 // Helper function to send timer-specific notifications
+#[allow(dead_code)]
 pub async fn send_timer_notification(
     app: &AppHandle,
     notification_type: TimerNotificationType,
     session_name: &str,
-    duration: Option<&str>,
+    _duration: Option<&str>,
 ) -> Result<(), String> {
     let (title, body, sound) = match notification_type {
         TimerNotificationType::Started => (
@@ -103,6 +100,7 @@ pub async fn send_timer_notification(
     send_notification(app.clone(), payload).await
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum TimerNotificationType {
     Started,

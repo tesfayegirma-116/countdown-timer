@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::Manager;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TimerSession {

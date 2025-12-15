@@ -1,108 +1,216 @@
+use tauri::menu::MenuEvent;
 use tauri::{
-    AboutMetadata, AppHandle, CustomMenuItem, Manager, Menu, MenuItem, Submenu, WindowMenuEvent, Wry
+    menu::{AboutMetadata, CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu},
+    AppHandle, Emitter, Manager, Runtime, WebviewWindow,
 };
 
-pub fn create_app_menu() -> Menu {
-    let app_menu = Submenu::new(
+pub fn create_app_menu<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
+    let app_menu = Submenu::with_items(
+        app,
         "Zetseat Church Timer",
-        Menu::new()
-            .add_native_item(MenuItem::About(
-                "Zetseat Church Timer".to_string(),
-                AboutMetadata::new()
-                    .version(env!("CARGO_PKG_VERSION"))
-                    .authors(vec!["Zetseat Church".to_string()])
-                    .comments("A focus timer for church services and meetings")
-                    .copyright("© 2024 Zetseat Church")
-                    .license("MIT")
-                    .website("https://zetseat.church")
-                    .website_label("Visit our website"),
-            ))
-            .add_native_item(MenuItem::Separator)
-            .add_item(CustomMenuItem::new("preferences", "Preferences...").accelerator("CmdOrCtrl+,"))
-            .add_native_item(MenuItem::Separator)
-            .add_native_item(MenuItem::Services)
-            .add_native_item(MenuItem::Separator)
-            .add_native_item(MenuItem::Hide)
-            .add_native_item(MenuItem::HideOthers)
-            .add_native_item(MenuItem::ShowAll)
-            .add_native_item(MenuItem::Separator)
-            .add_native_item(MenuItem::Quit),
-    );
+        true,
+        &[
+            &PredefinedMenuItem::about(
+                app,
+                Some("About Zetseat Church Timer"),
+                Some(AboutMetadata {
+                    version: Some(env!("CARGO_PKG_VERSION").into()),
+                    authors: Some(vec!["Zetseat Church".to_string()]),
+                    comments: Some("A focus timer for church services and meetings".into()),
+                    copyright: Some("© 2024 Zetseat Church".into()),
+                    license: Some("MIT".into()),
+                    website: Some("https://zetseat.church".into()),
+                    website_label: Some("Visit our website".into()),
+                    ..Default::default()
+                }),
+            )?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(
+                app,
+                "preferences",
+                "Preferences...",
+                true,
+                Some("CmdOrCtrl+,"),
+            )?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::services(app, None)?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::hide(app, None)?,
+            &PredefinedMenuItem::hide_others(app, None)?,
+            &PredefinedMenuItem::show_all(app, None)?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::quit(app, None)?,
+        ],
+    )?;
 
-    let file_menu = Submenu::new(
+    let file_menu = Submenu::with_items(
+        app,
         "File",
-        Menu::new()
-            .add_item(CustomMenuItem::new("new_session", "New Session").accelerator("CmdOrCtrl+N"))
-            .add_item(CustomMenuItem::new("save_session", "Save Session").accelerator("CmdOrCtrl+S"))
-            .add_native_item(MenuItem::Separator)
-            .add_item(CustomMenuItem::new("export_history", "Export History..."))
-            .add_item(CustomMenuItem::new("import_history", "Import History..."))
-            .add_native_item(MenuItem::Separator)
-            .add_native_item(MenuItem::CloseWindow),
-    );
+        true,
+        &[
+            &MenuItem::with_id(app, "new_session", "New Session", true, Some("CmdOrCtrl+N"))?,
+            &MenuItem::with_id(
+                app,
+                "save_session",
+                "Save Session",
+                true,
+                Some("CmdOrCtrl+S"),
+            )?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(
+                app,
+                "export_history",
+                "Export History...",
+                true,
+                None::<&str>,
+            )?,
+            &MenuItem::with_id(
+                app,
+                "import_history",
+                "Import History...",
+                true,
+                None::<&str>,
+            )?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::close_window(app, None)?,
+        ],
+    )?;
 
-    let timer_menu = Submenu::new(
+    let timer_menu = Submenu::with_items(
+        app,
         "Timer",
-        Menu::new()
-            .add_item(CustomMenuItem::new("start_pause", "Start/Pause").accelerator("Space"))
-            .add_item(CustomMenuItem::new("reset", "Reset").accelerator("CmdOrCtrl+R"))
-            .add_native_item(MenuItem::Separator)
-            .add_item(CustomMenuItem::new("set_5min", "Set 5 Minutes").accelerator("CmdOrCtrl+1"))
-            .add_item(CustomMenuItem::new("set_15min", "Set 15 Minutes").accelerator("CmdOrCtrl+2"))
-            .add_item(CustomMenuItem::new("set_25min", "Set 25 Minutes").accelerator("CmdOrCtrl+3"))
-            .add_item(CustomMenuItem::new("set_45min", "Set 45 Minutes").accelerator("CmdOrCtrl+4"))
-            .add_item(CustomMenuItem::new("set_60min", "Set 60 Minutes").accelerator("CmdOrCtrl+5"))
-            .add_native_item(MenuItem::Separator)
-            .add_item(CustomMenuItem::new("custom_time", "Custom Time...").accelerator("CmdOrCtrl+T")),
-    );
+        true,
+        &[
+            &MenuItem::with_id(app, "start_pause", "Start/Pause", true, Some("Space"))?,
+            &MenuItem::with_id(app, "reset", "Reset", true, Some("CmdOrCtrl+R"))?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(app, "set_5min", "Set 5 Minutes", true, Some("CmdOrCtrl+1"))?,
+            &MenuItem::with_id(
+                app,
+                "set_15min",
+                "Set 15 Minutes",
+                true,
+                Some("CmdOrCtrl+2"),
+            )?,
+            &MenuItem::with_id(
+                app,
+                "set_25min",
+                "Set 25 Minutes",
+                true,
+                Some("CmdOrCtrl+3"),
+            )?,
+            &MenuItem::with_id(
+                app,
+                "set_45min",
+                "Set 45 Minutes",
+                true,
+                Some("CmdOrCtrl+4"),
+            )?,
+            &MenuItem::with_id(
+                app,
+                "set_60min",
+                "Set 60 Minutes",
+                true,
+                Some("CmdOrCtrl+5"),
+            )?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(
+                app,
+                "custom_time",
+                "Custom Time...",
+                true,
+                Some("CmdOrCtrl+T"),
+            )?,
+        ],
+    )?;
 
-    let view_menu = Submenu::new(
+    let view_menu = Submenu::with_items(
+        app,
         "View",
-        Menu::new()
-            .add_item(CustomMenuItem::new("fullscreen", "Enter Fullscreen").accelerator("F"))
-            .add_item(CustomMenuItem::new("always_on_top", "Always on Top"))
-            .add_native_item(MenuItem::Separator)
-            .add_item(CustomMenuItem::new("show_history", "Show History").accelerator("CmdOrCtrl+H"))
-            .add_native_item(MenuItem::Separator)
-            .add_item(CustomMenuItem::new("minimize", "Minimize").accelerator("CmdOrCtrl+M"))
-            .add_item(CustomMenuItem::new("zoom", "Zoom")),
-    );
+        true,
+        &[
+            &MenuItem::with_id(app, "fullscreen", "Enter Fullscreen", true, Some("F"))?,
+            &CheckMenuItem::with_id(
+                app,
+                "always_on_top",
+                "Always on Top",
+                true,
+                false,
+                None::<&str>,
+            )?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(
+                app,
+                "show_history",
+                "Show History",
+                true,
+                Some("CmdOrCtrl+H"),
+            )?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(app, "minimize", "Minimize", true, Some("CmdOrCtrl+M"))?,
+            &MenuItem::with_id(app, "zoom", "Zoom", true, None::<&str>)?,
+        ],
+    )?;
 
-    let window_menu = Submenu::new(
+    let window_menu = Submenu::with_items(
+        app,
         "Window",
-        Menu::new()
-            .add_native_item(MenuItem::Minimize)
-            .add_item(CustomMenuItem::new("zoom", "Zoom"))
-            .add_native_item(MenuItem::Separator)
-            .add_item(CustomMenuItem::new("center", "Center Window"))
-            .add_native_item(MenuItem::Separator)
-            .add_native_item(MenuItem::CloseWindow),
-    );
+        true,
+        &[
+            &PredefinedMenuItem::minimize(app, None)?,
+            &MenuItem::with_id(app, "zoom", "Zoom", true, None::<&str>)?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(app, "center", "Center Window", true, None::<&str>)?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::close_window(app, None)?,
+        ],
+    )?;
 
-    let help_menu = Submenu::new(
+    let help_menu = Submenu::with_items(
+        app,
         "Help",
-        Menu::new()
-            .add_item(CustomMenuItem::new("keyboard_shortcuts", "Keyboard Shortcuts"))
-            .add_item(CustomMenuItem::new("user_guide", "User Guide"))
-            .add_native_item(MenuItem::Separator)
-            .add_item(CustomMenuItem::new("report_issue", "Report Issue"))
-            .add_item(CustomMenuItem::new("check_updates", "Check for Updates...")),
-    );
+        true,
+        &[
+            &MenuItem::with_id(
+                app,
+                "keyboard_shortcuts",
+                "Keyboard Shortcuts",
+                true,
+                None::<&str>,
+            )?,
+            &MenuItem::with_id(app, "user_guide", "User Guide", true, None::<&str>)?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(app, "report_issue", "Report Issue", true, None::<&str>)?,
+            &MenuItem::with_id(
+                app,
+                "check_updates",
+                "Check for Updates...",
+                true,
+                None::<&str>,
+            )?,
+        ],
+    )?;
 
-    Menu::new()
-        .add_submenu(app_menu)
-        .add_submenu(file_menu)
-        .add_submenu(timer_menu)
-        .add_submenu(view_menu)
-        .add_submenu(window_menu)
-        .add_submenu(help_menu)
+    Menu::with_items(
+        app,
+        &[
+            &app_menu,
+            &file_menu,
+            &timer_menu,
+            &view_menu,
+            &window_menu,
+            &help_menu,
+        ],
+    )
 }
 
-pub fn handle_menu_event(event: WindowMenuEvent<Wry>) {
-    let app_handle = event.window().app_handle();
-    let window = event.window();
+pub fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: MenuEvent) {
+    let window: WebviewWindow<R> = match app.get_webview_window("main") {
+        Some(w) => w,
+        None => return,
+    };
 
-    match event.menu_item_id() {
+    match event.id().as_ref() {
         // File Menu
         "new_session" => {
             let _ = window.emit("menu-new-session", ());
@@ -172,10 +280,18 @@ pub fn handle_menu_event(event: WindowMenuEvent<Wry>) {
             let _ = window.emit("menu-keyboard-shortcuts", ());
         }
         "user_guide" => {
-            let _ = tauri::api::shell::open(&app_handle.shell_scope(), "https://zetseat.church/timer-help", None);
+            // TODO: Add tauri-plugin-shell to Cargo.toml and uncomment below to enable opening URLs
+            // use tauri_plugin_shell::ShellExt;
+            // let _ = tauri::Url::parse("https://zetseat.church/timer-help").ok().map(|url| {
+            //    let _ = app.shell().open(url.to_string(), None);
+            // });
         }
         "report_issue" => {
-            let _ = tauri::api::shell::open(&app_handle.shell_scope(), "https://github.com/zetseat-church/timer/issues", None);
+            // TODO: Add tauri-plugin-shell to Cargo.toml and uncomment below to enable opening URLs
+            // use tauri_plugin_shell::ShellExt;
+            // let _ = tauri::Url::parse("https://github.com/zetseat-church/timer/issues").ok().map(|url| {
+            //    let _ = app.shell().open(url.to_string(), None);
+            // });
         }
         "check_updates" => {
             let _ = window.emit("menu-check-updates", ());

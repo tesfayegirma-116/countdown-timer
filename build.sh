@@ -39,7 +39,7 @@ fi
 
 # Parse command line arguments
 TARGET=""
-RELEASE_MODE="--release"
+DEBUG_MODE=false
 CLEAN_BUILD=false
 
 while [[ $# -gt 0 ]]; do
@@ -49,7 +49,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --debug)
-            RELEASE_MODE=""
+            DEBUG_MODE=true
             shift
             ;;
         --clean)
@@ -112,17 +112,21 @@ fi
 
 # Build the Tauri application
 print_status "Building Tauri application..."
-BUILD_CMD="tauri build $RELEASE_MODE"
 
+# Build Tauri args
+TAURI_ARGS=""
+if [ "$DEBUG_MODE" = true ]; then
+    TAURI_ARGS="--debug"
+fi
 if [ -n "$TARGET" ]; then
-    BUILD_CMD="$BUILD_CMD --target $TARGET"
+    TAURI_ARGS="$TAURI_ARGS --target $TARGET"
     print_status "Building for target: $TARGET"
 fi
 
 if command -v pnpm &> /dev/null; then
-    pnpm run $BUILD_CMD
+    pnpm tauri build $TAURI_ARGS
 else
-    npm run $BUILD_CMD
+    npx tauri build $TAURI_ARGS
 fi
 
 print_success "Build completed successfully!"

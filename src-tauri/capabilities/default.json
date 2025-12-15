@@ -28,7 +28,7 @@
     "fs:default",
     "fs:allow-read-file",
     "fs:allow-write-file",
-    "fs:allow-create-dir",
+    "fs:allow-mkdir",
     "fs:allow-exists",
     "notification:default",
     "notification:allow-is-permission-granted",
