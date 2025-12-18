@@ -237,17 +237,17 @@ export default function CountdownTimer() {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800;900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
-        
+
         html, body {
           overflow: hidden !important;
           height: 100vh !important;
           width: 100vw !important;
         }
-        
+
         * {
           box-sizing: border-box;
         }
-        
+
         .clock-font {
           font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
           font-feature-settings: 'tnum' 1, 'zero' 1;
@@ -255,101 +255,101 @@ export default function CountdownTimer() {
           letter-spacing: 0.05em;
           font-stretch: expanded;
         }
-        
+
         @keyframes gentle-breathe {
-          0%, 100% { 
+          0%, 100% {
             transform: scale(1);
             opacity: 0.95;
           }
-          50% { 
+          50% {
             transform: scale(1.002);
             opacity: 1;
           }
         }
-        
+
         @keyframes overtime-pulse-bg {
-          0%, 100% { 
+          0%, 100% {
             background: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #dc2626 100%);
           }
         }
-        
+
         @keyframes warning-pulse-bg {
-          0%, 100% { 
+          0%, 100% {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #f59e0b 100%);
           }
         }
-        
+
         @keyframes overtime-heartbeat {
-          0%, 100% { 
+          0%, 100% {
             transform: scale(1);
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(220, 38, 38, 0.4);
           }
-          50% { 
+          50% {
             transform: scale(1.01);
             text-shadow: 0 0 25px rgba(255, 255, 255, 0.7), 0 0 50px rgba(220, 38, 38, 0.5);
           }
         }
-        
+
         @keyframes warning-pulse {
-          0%, 100% { 
+          0%, 100% {
             transform: scale(1);
             text-shadow: 0 0 15px rgba(0, 0, 0, 0.6), 0 0 30px rgba(245, 158, 11, 0.4);
           }
-          50% { 
+          50% {
             transform: scale(1.01);
             text-shadow: 0 0 20px rgba(0, 0, 0, 0.7), 0 0 40px rgba(245, 158, 11, 0.5);
           }
         }
-        
+
         @keyframes soft-glow {
-          0%, 100% { 
+          0%, 100% {
             box-shadow: 0 0 15px rgba(220, 38, 38, 0.3);
           }
-          50% { 
+          50% {
             box-shadow: 0 0 25px rgba(220, 38, 38, 0.5), 0 0 40px rgba(234, 88, 12, 0.3);
           }
         }
-        
+
         .gentle-breathe {
           animation: gentle-breathe 8s ease-in-out infinite;
         }
-        
+
         .overtime-pulse-bg {
           background: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #dc2626 100%);
         }
-        
+
         .warning-pulse-bg {
           background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #f59e0b 100%);
         }
-        
+
         .overtime-heartbeat-text {
           animation: overtime-heartbeat 5s ease-in-out infinite;
         }
-        
+
         .warning-pulse-text {
           animation: warning-pulse 6s ease-in-out infinite;
         }
-        
+
         .soft-glow {
           animation: soft-glow 3s ease-in-out infinite;
         }
-        
+
         .minimal-gradient {
           background: linear-gradient(135deg, #fafafa 0%, #f8fafc 50%, #f1f5f9 100%);
         }
-        
+
         .glass-effect {
           backdrop-filter: blur(20px);
           background: rgba(255, 255, 255, 0.8);
           border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         /* Creative Logo Styles */
         .creative-logo-container {
           position: relative;
           display: inline-block;
         }
-        
+
         .logo-glow-bg {
           position: absolute;
           top: 50%;
@@ -361,23 +361,23 @@ export default function CountdownTimer() {
           border-radius: 50%;
           animation: gentle-breathe 6s ease-in-out infinite;
         }
-        
+
         .creative-logo {
           transition: all 0.3s ease;
           filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.1));
         }
-        
+
         .creative-logo:hover {
           transform: scale(1.05);
           filter: drop-shadow(0 8px 30px rgba(0, 0, 0, 0.15));
         }
-        
+
         /* Creative Controls Styles */
         .creative-controls-container {
           position: relative;
           display: inline-block;
         }
-        
+
         .creative-controls-bg {
           position: absolute;
           top: 50%;
@@ -389,13 +389,13 @@ export default function CountdownTimer() {
           border-radius: 50%;
           animation: gentle-breathe 10s ease-in-out infinite reverse;
         }
-        
+
         .creative-button {
           position: relative;
           border-radius: 50%;
           overflow: hidden;
         }
-        
+
         .creative-button::before {
           content: '';
           position: absolute;
@@ -407,29 +407,29 @@ export default function CountdownTimer() {
           transform: translateX(-100%);
           transition: transform 0.6s ease;
         }
-        
+
         .creative-button:hover::before {
           transform: translateX(100%);
         }
-        
+
         .creative-play-button {
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
         }
-        
+
         .creative-reset-button {
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
         }
-        
+
         /* Creative Secondary Controls */
         .creative-secondary-controls {
           position: relative;
         }
-        
+
         .creative-secondary-button {
           position: relative;
           overflow: hidden;
         }
-        
+
         .creative-secondary-button::before {
           content: '';
           position: absolute;
@@ -440,17 +440,17 @@ export default function CountdownTimer() {
           background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
           transition: left 0.5s ease;
         }
-        
+
         .creative-secondary-button:hover::before {
           left: 100%;
         }
-        
+
         .creative-focus-button {
           position: relative;
           overflow: hidden;
           box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
-        
+
         .creative-focus-button::before {
           content: '';
           position: absolute;
@@ -461,23 +461,23 @@ export default function CountdownTimer() {
           background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
           transition: left 0.5s ease;
         }
-        
+
         .creative-focus-button:hover::before {
           left: 100%;
         }
-        
+
         /* Natural Info Container */
         .natural-info-container {
           text-align: center;
           max-width: 600px;
           margin: 0 auto;
         }
-        
+
         /* Pro Minimalist Button Styles */
         .pro-controls-container {
           position: relative;
         }
-        
+
         .pro-button {
           border-radius: 50%;
           position: relative;
@@ -485,35 +485,35 @@ export default function CountdownTimer() {
           backdrop-filter: blur(10px);
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         .pro-play-button {
-          box-shadow: 
+          box-shadow:
             0 20px 40px rgba(0, 0, 0, 0.15),
             0 0 0 1px rgba(255, 255, 255, 0.1) inset,
             0 1px 0 rgba(255, 255, 255, 0.2) inset;
         }
-        
+
         .pro-play-button:hover {
-          box-shadow: 
+          box-shadow:
             0 25px 50px rgba(0, 0, 0, 0.2),
             0 0 0 1px rgba(255, 255, 255, 0.15) inset,
             0 1px 0 rgba(255, 255, 255, 0.25) inset;
         }
-        
+
         .pro-reset-button {
-          box-shadow: 
+          box-shadow:
             0 15px 30px rgba(0, 0, 0, 0.08),
             0 0 0 1px rgba(0, 0, 0, 0.05) inset,
             0 1px 0 rgba(255, 255, 255, 0.9) inset;
         }
-        
+
         .pro-reset-button:hover {
-          box-shadow: 
+          box-shadow:
             0 20px 40px rgba(0, 0, 0, 0.12),
             0 0 0 1px rgba(0, 0, 0, 0.08) inset,
             0 1px 0 rgba(255, 255, 255, 0.95) inset;
         }
-        
+
         .pro-button::after {
           content: '';
           position: absolute;
@@ -548,7 +548,7 @@ export default function CountdownTimer() {
         {!isFullscreen && (
           <div className="w-full flex justify-center pt-6 pb-2">
             <img
-              src="https://zetseat.church/static/784249cfbfaf2b3892996cd64f064c82/d4cf7/logoEng.webp"
+              src="./images/logo.png"
               alt="Zetseat Church Logo"
               className="h-8 md:h-10 object-contain opacity-60 hover:opacity-80 transition-opacity duration-300"
             />
