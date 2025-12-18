@@ -555,6 +555,69 @@ export default function CountdownTimer() {
           </div>
         )}
 
+        {!isFullscreen && (<div className="flex justify-center mt-4">
+          <div
+            className={cn(
+              "transition-all duration-700 text-7xl font-medium mb-1",
+              timer.isOvertime
+                ? "text-red-500"
+                : isWarningTime
+                  ? "text-amber-500"
+                  : timer.isRunning
+                    ? "text-gray-700"
+                    : "text-gray-600",
+            )}
+          >
+            {timer.isOvertime ? (
+              "Extra Time"
+            ) : isWarningTime ? (
+              "Final Minutes"
+            ) : timer.isRunning ? (
+              "Time Lapse"
+            ) : (
+              "Ready to Start"
+            )}
+          </div>
+        </div>)}
+
+        {isFullscreen && (
+          <div className="flex justify-center mt-32">
+            <div
+            className={cn(
+              "mb-1 transition-all duration-700 font-bold text-xs md:text-5xl",
+              timer.isOvertime
+                ? "text-white animate-pulse"
+                : isWarningTime
+                  ? "text-black animate-pulse"
+                  : "text-neutral-200",
+            )}
+          >
+            {timer.isOvertime ? (
+              <span
+                className="font-black"
+                style={{
+                  textShadow: "0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(220, 38, 38, 0.4)",
+                }}
+              >
+                🚨 EXTRA TIME 🚨
+              </span>
+            ) : isWarningTime ? (
+              <span
+                className="font-black"
+                style={{
+                  textShadow: "0 0 10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 158, 11, 0.4)",
+                }}
+              >
+                ⚠️ FINAL MINUTES ⚠️
+              </span>
+            ) : timer.isRunning ? (
+              "TIME LAPSE"
+            ) : (
+              "READY TO START"
+            )}
+          </div>
+        </div>)}
+
         <div className="flex-1 flex items-center justify-center overflow-hidden relative">
           {isFullscreen && (
             <div className="fixed top-2 right-2 z-10 text-neutral-400 text-xs opacity-40 hover:opacity-80 transition-all duration-300">
@@ -773,29 +836,7 @@ export default function CountdownTimer() {
 
                 {/* Status and Date at Bottom */}
                 {!isFullscreen && (
-                  <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 text-center z-10">
-                    <div
-                      className={cn(
-                        "transition-all duration-700 text-lg font-medium mb-1",
-                        timer.isOvertime
-                          ? "text-red-500"
-                          : isWarningTime
-                            ? "text-amber-500"
-                            : timer.isRunning
-                              ? "text-gray-700"
-                              : "text-gray-600",
-                      )}
-                    >
-                      {timer.isOvertime ? (
-                        "Overtime"
-                      ) : isWarningTime ? (
-                        "Final Minutes"
-                      ) : timer.isRunning ? (
-                        "Focus Time"
-                      ) : (
-                        "Ready to Start"
-                      )}
-                    </div>
+                  <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 text-center z-10">
                     <div className="text-xs text-gray-400 font-normal">
                       {getCurrentDateString()}
                     </div>
@@ -808,40 +849,7 @@ export default function CountdownTimer() {
                     {/* Status Text and Session Name - Above Buttons */}
                     <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-10 text-center opacity-60">
                       {/* Status Text */}
-                      <div
-                        className={cn(
-                          "mb-1 transition-all duration-700 font-bold text-xs md:text-sm",
-                          timer.isOvertime
-                            ? "text-white animate-pulse"
-                            : isWarningTime
-                              ? "text-black animate-pulse"
-                              : "text-neutral-200",
-                        )}
-                      >
-                        {timer.isOvertime ? (
-                          <span
-                            className="font-black"
-                            style={{
-                              textShadow: "0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(220, 38, 38, 0.4)",
-                            }}
-                          >
-                            🚨 OVERTIME 🚨
-                          </span>
-                        ) : isWarningTime ? (
-                          <span
-                            className="font-black"
-                            style={{
-                              textShadow: "0 0 10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 158, 11, 0.4)",
-                            }}
-                          >
-                            ⚠️ FINAL MINUTES ⚠️
-                          </span>
-                        ) : timer.isRunning ? (
-                          "FOCUS TIME"
-                        ) : (
-                          "READY TO START"
-                        )}
-                      </div>
+
 
                       {/* Session Name */}
                       <div
