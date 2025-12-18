@@ -25,6 +25,16 @@ use window_controls::{
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(
+            tauri_plugin_log::Builder::default()
+                .targets([
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout),
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir { file_name: Some("app.log".into()) }),
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Webview),
+                ])
+                .level(log::LevelFilter::Info)
+                .build(),
+        )
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(
@@ -48,19 +58,6 @@ pub fn run() {
         // .plugin(tauri_plugin_updater::Builder::new().build())
         .on_menu_event(|app, event| handle_menu_event(app, event))
         .setup(|app| {
-            // Always enable logging to file, even in release
-            // This MUST be the first thing initialized to catch startup errors
-            app.handle().plugin(
-                tauri_plugin_log::Builder::default()
-                    .targets([
-                        tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout),
-                        tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir { file_name: Some("app.log".into()) }),
-                        tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Webview),
-                    ])
-                    .level(log::LevelFilter::Info)
-                    .build(),
-            )?;
-
             let handle = app.handle();
 
             // Initialize system tray
