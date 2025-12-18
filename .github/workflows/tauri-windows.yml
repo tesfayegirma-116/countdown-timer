@@ -2,7 +2,7 @@ name: Build Windows Desktop App
 
 on:
   push:
-    branches: [main]
+    branches: ["*"]
   workflow_dispatch:
 
 jobs:
