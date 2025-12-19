@@ -44,7 +44,6 @@
     "@sveltejs/kit": "latest",
     "@vercel/analytics": "latest",
     "autoprefixer": "^10.4.20",
-    "better-sqlite3": "latest",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
@@ -74,7 +73,6 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
     "@tauri-apps/cli": "^2.9.6",
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",

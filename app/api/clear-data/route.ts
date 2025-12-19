@@ -3,7 +3,7 @@ import { clearAllTimerSessions } from "@/lib/database"
 
 export async function DELETE() {
     try {
-        const deletedCount = clearAllTimerSessions()
+        const deletedCount = await clearAllTimerSessions()
 
         return NextResponse.json({
             success: true,

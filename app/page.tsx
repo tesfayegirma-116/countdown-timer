@@ -555,68 +555,39 @@ export default function CountdownTimer() {
           </div>
         )}
 
-        {!isFullscreen && (<div className="flex justify-center mt-4">
-          <div
-            className={cn(
-              "transition-all duration-700 text-7xl font-medium mb-1",
-              timer.isOvertime
-                ? "text-red-500"
-                : isWarningTime
-                  ? "text-amber-500"
-                  : timer.isRunning
-                    ? "text-gray-700"
-                    : "text-gray-600",
-            )}
-          >
-            {timer.isOvertime ? (
-              "Extra Time"
-            ) : isWarningTime ? (
-              "Final Minutes"
-            ) : timer.isRunning ? (
-              "Time Lapse"
-            ) : (
-              "Ready to Start"
-            )}
-          </div>
-        </div>)}
-
-        {isFullscreen && (
-          <div className="flex justify-center mt-32">
+        {!isFullscreen && (
+          <div className="flex justify-center mt-8 md:mt-12">
             <div
-            className={cn(
-              "mb-1 transition-all duration-700 font-bold text-xs md:text-5xl",
-              timer.isOvertime
-                ? "text-white animate-pulse"
-                : isWarningTime
-                  ? "text-black animate-pulse"
-                  : "text-neutral-200",
-            )}
-          >
-            {timer.isOvertime ? (
-              <span
-                className="font-black"
-                style={{
-                  textShadow: "0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(220, 38, 38, 0.4)",
-                }}
-              >
-                🚨 EXTRA TIME 🚨
-              </span>
-            ) : isWarningTime ? (
-              <span
-                className="font-black"
-                style={{
-                  textShadow: "0 0 10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 158, 11, 0.4)",
-                }}
-              >
-                ⚠️ FINAL MINUTES ⚠️
-              </span>
-            ) : timer.isRunning ? (
-              "TIME LAPSE"
-            ) : (
-              "READY TO START"
-            )}
+              className={cn(
+                "transition-all duration-700 font-bold mb-2 uppercase tracking-widest text-center",
+                "text-6xl sm:text-7xl md:text-8xl lg:text-9xl",
+                timer.isOvertime
+                  ? "text-red-600"
+                  : isWarningTime
+                    ? "text-amber-500"
+                    : timer.isRunning
+                      ? "text-neutral-800"
+                      : "text-neutral-400",
+              )}
+              style={{
+                fontFamily: "'Inter', system-ui, sans-serif",
+                letterSpacing: "0.15em",
+                fontWeight: 900
+              }}
+            >
+              {timer.isOvertime ? (
+                "Extra Time"
+              ) : isWarningTime ? (
+                "Final Minutes"
+              ) : timer.isRunning ? (
+                "Time Lapse"
+              ) : (
+                "Ready"
+              )}
+            </div>
           </div>
-        </div>)}
+        )}
+
 
         <div className="flex-1 flex items-center justify-center overflow-hidden relative">
           {isFullscreen && (
@@ -711,11 +682,41 @@ export default function CountdownTimer() {
               >
                 {/* Timer Display */}
                 <div className={cn("mb-8 md:mb-12 relative", isFullscreen ? "flex flex-col justify-center items-center absolute inset-0" : "")}>
+                  {isFullscreen && (
+                    <div
+                      className={cn(
+                        "transition-all duration-700 font-bold uppercase tracking-widest text-center mb-4",
+                        "text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem]",
+                        timer.isOvertime
+                          ? "text-white"
+                          : isWarningTime
+                            ? "text-black"
+                            : timer.isRunning
+                              ? "text-neutral-900"
+                              : "text-white",
+                      )}
+                      style={{
+                        fontFamily: "'Inter', system-ui, sans-serif",
+                        letterSpacing: "0.15em",
+                        fontWeight: 900
+                      }}
+                    >
+                      {timer.isOvertime ? (
+                        "Extra Time"
+                      ) : isWarningTime ? (
+                        "Final Phase"
+                      ) : timer.isRunning ? (
+                        "Time Lapse"
+                      ) : (
+                        "Ready"
+                      )}
+                    </div>
+                  )}
                   <div
                     className={cn(
                       "clock-font tracking-tight mb-4 transition-all duration-700 leading-none select-none w-full flex justify-center",
                       isFullscreen
-                        ? "text-6xl sm:text-[20xl] md:text-[22rem] lg:text-[24rem] xl:text-[32rem]"
+                        ? "text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[20rem] xl:text-[26rem] 2xl:text-[32rem]"
                         : "",
                       timer.isOvertime
                         ? isFullscreen
@@ -737,16 +738,16 @@ export default function CountdownTimer() {
                     style={{
                       fontWeight: 900,
                       fontSize: isFullscreen
-                        ? undefined
-                        : `clamp(6rem, 20vw, 24rem)`,
+                        ? `clamp(10rem, 28vw, 38rem)`
+                        : `clamp(8rem, 25vw, 28rem)`,
                       textShadow: isFullscreen
                         ? timer.isOvertime
-                          ? "0 0 50px rgba(255, 255, 255, 0.8), 0 0 100px rgba(220, 38, 38, 0.6)"
+                          ? "0 2px 8px rgba(0, 0, 0, 0.15)"
                           : isWarningTime
-                            ? "0 0 40px rgba(0, 0, 0, 0.8), 0 0 80px rgba(245, 158, 11, 0.6)"
+                            ? "0 2px 8px rgba(0, 0, 0, 0.1)"
                             : timer.isRunning
-                              ? "0 0 80px rgba(255,255,255,0.5)"
-                              : "0 0 80px rgba(0,0,0,0.5)"
+                              ? "0 2px 6px rgba(0, 0, 0, 0.08)"
+                              : "0 2px 6px rgba(255, 255, 255, 0.1)"
                         : !isFullscreen
                           ? "0 4px 20px rgba(0,0,0,0.15)"
                           : "none",

@@ -1,30 +1,7 @@
-import Database from "better-sqlite3"
+import fs from "fs"
 import path from "path"
 
-// Initialize SQLite database with WAL mode for better performance
-const dbPath = path.join(process.cwd(), "timer_sessions.db")
-const db = new Database(dbPath)
-
-// Enable WAL mode for better concurrent access
-db.pragma("journal_mode = WAL")
-db.pragma("synchronous = NORMAL")
-db.pragma("cache_size = 1000000")
-db.pragma("temp_store = memory")
-
-// Create timer_sessions table if it doesn't exist
-db.exec(`
-  CREATE TABLE IF NOT EXISTS timer_sessions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    session_name TEXT NOT NULL,
-    target_duration INTEGER NOT NULL,
-    actual_duration INTEGER NOT NULL,
-    extra_time INTEGER NOT NULL DEFAULT 0,
-    completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    session_date TEXT DEFAULT (date('now')),
-    session_year INTEGER DEFAULT (strftime('%Y', 'now'))
-  )
-`)
+const dbPath = path.join(process.cwd(), "timer_sessions.json")
 
 export interface TimerSession {
   id: number
@@ -38,65 +15,78 @@ export interface TimerSession {
   session_year: number
 }
 
-export function saveTimerSession(
+interface DatabaseData {
+  sessions: TimerSession[]
+  nextId: number
+}
+
+function readDatabase(): DatabaseData {
+  if (!fs.existsSync(dbPath)) {
+    return { sessions: [], nextId: 1 }
+  }
+  const content = fs.readFileSync(dbPath, "utf-8")
+  return JSON.parse(content) as DatabaseData
+}
+
+function writeDatabase(data: DatabaseData): void {
+  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2))
+}
+
+export async function saveTimerSession(
   session: Omit<TimerSession, "id" | "completed_at" | "created_at" | "session_date" | "session_year">,
-): TimerSession {
-  const stmt = db.prepare(`
-    INSERT INTO timer_sessions (session_name, target_duration, actual_duration, extra_time)
-    VALUES (?, ?, ?, ?)
-  `)
+): Promise<TimerSession> {
+  const data = readDatabase()
+  const now = new Date()
 
-  const result = stmt.run(session.session_name, session.target_duration, session.actual_duration, session.extra_time)
+  const newSession: TimerSession = {
+    id: data.nextId,
+    session_name: session.session_name,
+    target_duration: session.target_duration,
+    actual_duration: session.actual_duration,
+    extra_time: session.extra_time,
+    completed_at: now.toISOString(),
+    created_at: now.toISOString(),
+    session_date: now.toISOString().split("T")[0],
+    session_year: now.getFullYear(),
+  }
 
-  // Get the inserted record
-  const getStmt = db.prepare("SELECT * FROM timer_sessions WHERE id = ?")
-  return getStmt.get(result.lastInsertRowid) as TimerSession
+  data.sessions.push(newSession)
+  data.nextId++
+  writeDatabase(data)
+
+  return newSession
 }
 
-export function getTimerSessions(limit = 50): TimerSession[] {
-  const stmt = db.prepare(`
-    SELECT * FROM timer_sessions 
-    ORDER BY completed_at DESC 
-    LIMIT ?
-  `)
-  return stmt.all(limit) as TimerSession[]
+export async function getTimerSessions(limit = 50): Promise<TimerSession[]> {
+  const data = readDatabase()
+  return data.sessions
+    .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
+    .slice(0, limit)
 }
 
-export function getTimerSessionsByDate(date: string): TimerSession[] {
-  const stmt = db.prepare(`
-    SELECT * FROM timer_sessions 
-    WHERE session_date = ?
-    ORDER BY completed_at DESC
-  `)
-  return stmt.all(date) as TimerSession[]
+export async function getTimerSessionsByDate(date: string): Promise<TimerSession[]> {
+  const data = readDatabase()
+  return data.sessions
+    .filter((s) => s.session_date === date)
+    .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
 }
 
-export function deleteTimerSession(id: number): boolean {
-  const stmt = db.prepare("DELETE FROM timer_sessions WHERE id = ?")
-  const result = stmt.run(id)
-  return result.changes > 0
+export async function deleteTimerSession(id: number): Promise<boolean> {
+  const data = readDatabase()
+  const index = data.sessions.findIndex((s) => s.id === id)
+
+  if (index === -1) return false
+
+  data.sessions.splice(index, 1)
+  writeDatabase(data)
+  return true
 }
 
-//curl -X DELETE http://localhost:3000/api/clear-data
-export function clearAllTimerSessions(): number {
-  const stmt = db.prepare("DELETE FROM timer_sessions")
-  const result = stmt.run()
-  return result.changes
-}
+export async function clearAllTimerSessions(): Promise<number> {
+  const data = readDatabase()
+  const count = data.sessions.length
 
-// Graceful shutdown - only add listeners if not already present
-const closeHandler = () => db.close()
-const exitHandler = (signal: number) => () => process.exit(128 + signal)
-
-if (!process.listenerCount("exit")) {
-  process.on("exit", closeHandler)
-}
-if (!process.listenerCount("SIGHUP")) {
-  process.on("SIGHUP", exitHandler(1))
-}
-if (!process.listenerCount("SIGINT")) {
-  process.on("SIGINT", exitHandler(2))
-}
-if (!process.listenerCount("SIGTERM")) {
-  process.on("SIGTERM", exitHandler(15))
+  data.sessions = []
+  writeDatabase(data)
+  return count
 }

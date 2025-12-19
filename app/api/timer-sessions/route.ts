@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { session_name, target_duration, actual_duration, extra_time } = body
 
-    const sessionId = saveTimerSession({
+    const sessionId = await saveTimerSession({
       session_name,
       target_duration,
       actual_duration,
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const sessions = getTimerSessions()
+    const sessions = await getTimerSessions()
     return NextResponse.json({ sessions })
   } catch (error) {
     console.error("Error fetching timer sessions:", error)
@@ -39,7 +39,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Session ID is required" }, { status: 400 })
     }
 
-    const success = deleteTimerSession(parseInt(id))
+    const success = await deleteTimerSession(parseInt(id))
 
     if (success) {
       return NextResponse.json({ success: true })

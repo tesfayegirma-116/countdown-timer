@@ -1,0 +1,115 @@
+{
+  "sessions": [
+    {
+      "id": 6,
+      "session_name": "Friday, December 19, 2025",
+      "target_duration": 1500,
+      "actual_duration": 91,
+      "extra_time": 0,
+      "completed_at": "2025-12-19T13:03:56.420Z",
+      "created_at": "2025-12-19T13:03:56.420Z",
+      "session_date": "2025-12-19",
+      "session_year": 2025
+    },
+    {
+      "id": 7,
+      "session_name": "Friday, December 19, 2025",
+      "target_duration": 300,
+      "actual_duration": 93,
+      "extra_time": 0,
+      "completed_at": "2025-12-19T13:07:16.768Z",
+      "created_at": "2025-12-19T13:07:16.768Z",
+      "session_date": "2025-12-19",
+      "session_year": 2025
+    },
+    {
+      "id": 8,
+      "session_name": "Friday, December 19, 2025",
+      "target_duration": 70,
+      "actual_duration": 2,
+      "extra_time": 0,
+      "completed_at": "2025-12-19T13:09:12.731Z",
+      "created_at": "2025-12-19T13:09:12.731Z",
+      "session_date": "2025-12-19",
+      "session_year": 2025
+    },
+    {
+      "id": 9,
+      "session_name": "Friday, December 19, 2025",
+      "target_duration": 10,
+      "actual_duration": 19,
+      "extra_time": 9,
+      "completed_at": "2025-12-19T13:09:37.089Z",
+      "created_at": "2025-12-19T13:09:37.089Z",
+      "session_date": "2025-12-19",
+      "session_year": 2025
+    },
+    {
+      "id": 10,
+      "session_name": "Friday, December 19, 2025",
+      "target_duration": 10,
+      "actual_duration": 4,
+      "extra_time": 0,
+      "completed_at": "2025-12-19T13:10:14.641Z",
+      "created_at": "2025-12-19T13:10:14.641Z",
+      "session_date": "2025-12-19",
+      "session_year": 2025
+    },
+    {
+      "id": 11,
+      "session_name": "Friday, December 19, 2025",
+      "target_duration": 10,
+      "actual_duration": 9,
+      "extra_time": 0,
+      "completed_at": "2025-12-19T13:10:35.707Z",
+      "created_at": "2025-12-19T13:10:35.707Z",
+      "session_date": "2025-12-19",
+      "session_year": 2025
+    },
+    {
+      "id": 12,
+      "session_name": "Friday, December 19, 2025",
+      "target_duration": 10,
+      "actual_duration": 49,
+      "extra_time": 0,
+      "completed_at": "2025-12-19T13:12:31.724Z",
+      "created_at": "2025-12-19T13:12:31.724Z",
+      "session_date": "2025-12-19",
+      "session_year": 2025
+    },
+    {
+      "id": 13,
+      "session_name": "Friday, December 19, 2025",
+      "target_duration": 1500,
+      "actual_duration": 5,
+      "extra_time": 0,
+      "completed_at": "2025-12-19T13:13:49.659Z",
+      "created_at": "2025-12-19T13:13:49.659Z",
+      "session_date": "2025-12-19",
+      "session_year": 2025
+    },
+    {
+      "id": 14,
+      "session_name": "Friday, December 19, 2025",
+      "target_duration": 1500,
+      "actual_duration": 45,
+      "extra_time": 0,
+      "completed_at": "2025-12-19T13:15:03.571Z",
+      "created_at": "2025-12-19T13:15:03.571Z",
+      "session_date": "2025-12-19",
+      "session_year": 2025
+    },
+    {
+      "id": 15,
+      "session_name": "Friday, December 19, 2025",
+      "target_duration": 1500,
+      "actual_duration": 18,
+      "extra_time": 0,
+      "completed_at": "2025-12-19T13:15:50.587Z",
+      "created_at": "2025-12-19T13:15:50.587Z",
+      "session_date": "2025-12-19",
+      "session_year": 2025
+    }
+  ],
+  "nextId": 16
+}
