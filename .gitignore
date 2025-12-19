@@ -31,3 +31,5 @@ prisma/migrations
 *.db
 *.db-shm
 *.db-wal
+
+timer_sessions.json
