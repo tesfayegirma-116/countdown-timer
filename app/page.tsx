@@ -216,6 +216,40 @@ export default function CountdownTimer() {
         event.preventDefault()
         resetTimer()
       }
+      // Arrow Up to increase timer by 1 minute (only when not running)
+      if (event.code === "ArrowUp" && !timer.isRunning && !showSettings && !showCustomTimer) {
+        event.preventDefault()
+        setTimer((prev) => {
+          const newMinutes = prev.minutes + 1
+          const newDuration = newMinutes * 60 + prev.seconds
+          return {
+            ...prev,
+            minutes: newMinutes,
+            targetDuration: newDuration,
+          }
+        })
+      }
+      // Arrow Down to decrease timer by 1 minute (only when not running, minimum 0)
+      if (event.code === "ArrowDown" && !timer.isRunning && !showSettings && !showCustomTimer) {
+        event.preventDefault()
+        setTimer((prev) => {
+          if (prev.minutes <= 0 && prev.seconds <= 0) return prev
+          let newMinutes = prev.minutes
+          let newSeconds = prev.seconds
+          if (newMinutes > 0) {
+            newMinutes = newMinutes - 1
+          } else if (newSeconds > 0) {
+            newSeconds = 0
+          }
+          const newDuration = newMinutes * 60 + newSeconds
+          return {
+            ...prev,
+            minutes: newMinutes,
+            seconds: newSeconds,
+            targetDuration: newDuration,
+          }
+        })
+      }
     }
 
     document.addEventListener("keydown", handleKeyPress)
